@@ -170,6 +170,7 @@ export default function App() {
     displayName, setDisplayName,
     birthYear, setBirthYear,
     currency, setCurrency,
+    hideLockedInTrend, setHideLockedInTrend,
   } = useAppSettings();
   const {
     aiSuggestions,
@@ -1150,6 +1151,8 @@ export default function App() {
       birthYear={birthYear}
       onBirthYearChange={setBirthYear}
       onCurrencyChange={setCurrency}
+      hideLockedInTrend={hideLockedInTrend}
+      onHideLockedInTrendChange={setHideLockedInTrend}
       onDeleteAllData={handleDeleteAllData}
       onRestartOnboarding={handleRestartOnboarding}
       onRestoreProfileCategoryDefaults={handleRestoreProfileCategoryDefaults}

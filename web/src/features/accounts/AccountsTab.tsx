@@ -52,10 +52,10 @@ export function AccountsTab({
         </article>
         <article className="border border-line rounded-md px-4 py-[0.9rem] bg-surface shadow-soft hover:border-line-strong transition-colors">
           <h2 className="text-[0.72rem] uppercase tracking-[0.12em] text-muted font-bold">Net Worth</h2>
-          <p className="font-mono text-ink font-semibold tracking-[-0.03em] mt-[0.38rem] text-[clamp(1.2rem,1.8vw,1.55rem)]">{formatCurrency(accountSummary.netWorth, currency)}</p>
+          <p className="font-mono text-ink font-semibold tracking-[-0.03em] mt-[0.38rem] text-[clamp(1.2rem,1.8vw,1.55rem)]">{formatCurrency(accountSummary.liquidNetWorth, currency)}</p>
           {accountSummary.lockedAssets > 0 ? (
             <span className="text-[0.68rem] text-muted font-normal mt-[0.2rem] inline-block">
-              🔒 {formatCurrency(accountSummary.lockedAssets, currency)} locked
+              + {formatCurrency(accountSummary.lockedAssets, currency)} locked = {formatCurrency(accountSummary.netWorth, currency)} total
             </span>
           ) : null}
         </article>

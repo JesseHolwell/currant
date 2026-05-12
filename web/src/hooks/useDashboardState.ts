@@ -365,7 +365,9 @@ export function useDashboardState({
     };
   }, [effectiveTransactions]);
 
-  const startNetWorth = accountSummary.netWorth;
+  // Forecast and headline displays use liquid net worth — super is tracked
+  // and shown separately, but isn't spendable wealth for "where am I headed."
+  const startNetWorth = accountSummary.liquidNetWorth;
   const monthlyForecastDelta = inferredMonthlyNetFlow;
   const maxGoalTarget = resolvedGoals.reduce((max, goal) => Math.max(max, goal.target), 0);
 

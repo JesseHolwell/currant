@@ -4,6 +4,8 @@ import type { DashboardTab, PayFrequency, ResolvedGoalEntry } from "../../domain
 
 type AccountSummary = {
   netWorth: number;
+  liquidNetWorth: number;
+  lockedAssets: number;
   byBucket: Array<{ bucket: string; total: number }>;
 };
 
@@ -177,8 +179,14 @@ export function Sidebar({
             </ul>
             <div className="mt-2 flex items-center justify-between font-bold text-ink">
               <span>Net Worth</span>
-              <strong>{formatCurrency(accountSummary.netWorth, currency)}</strong>
+              <strong>{formatCurrency(accountSummary.liquidNetWorth, currency)}</strong>
             </div>
+            {accountSummary.lockedAssets > 0 ? (
+              <div className="flex items-center justify-between text-[0.72rem] text-muted mt-[0.2rem]">
+                <span>Incl. locked</span>
+                <span>{formatCurrency(accountSummary.netWorth, currency)}</span>
+              </div>
+            ) : null}
           </section>
 
           <section className="border border-line rounded-md p-3 bg-surface">

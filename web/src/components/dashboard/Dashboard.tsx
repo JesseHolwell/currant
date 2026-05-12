@@ -145,6 +145,8 @@ interface DashboardProps {
   birthYear: number;
   onBirthYearChange: (year: number) => void;
   onCurrencyChange: (currency: string) => void;
+  hideLockedInTrend: boolean;
+  onHideLockedInTrendChange: (hidden: boolean) => void;
   onDeleteAllData: () => Promise<void>;
   onRestartOnboarding: () => void;
   onRestoreProfileCategoryDefaults: () => void;
@@ -308,6 +310,8 @@ export function Dashboard({
   birthYear,
   onBirthYearChange,
   onCurrencyChange,
+  hideLockedInTrend,
+  onHideLockedInTrendChange,
   onDeleteAllData,
   onRestartOnboarding,
   onRestoreProfileCategoryDefaults,
@@ -455,6 +459,8 @@ export function Dashboard({
             <DashboardOverviewTab
               currency={derived.meta.currency}
               accountSummary={derived.accountSummary}
+              hideLockedInTrend={hideLockedInTrend}
+              onHideLockedInTrendChange={onHideLockedInTrendChange}
               startNetWorth={derived.startNetWorth}
               monthlyForecastDelta={derived.monthlyForecastDelta}
               forecastPoints={derived.forecastPoints}

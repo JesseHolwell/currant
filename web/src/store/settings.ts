@@ -13,6 +13,9 @@ interface SettingsState {
   /** ISO 4217 currency code, e.g. "AUD", "USD", "GBP". */
   currency: string;
   setCurrency: (currency: string) => void;
+  /** Hide locked accounts (e.g. super) from the Account Trend chart. */
+  hideLockedInTrend: boolean;
+  setHideLockedInTrend: (hidden: boolean) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -26,6 +29,8 @@ export const useSettingsStore = create<SettingsState>()(
       setBirthYear: (year) => set({ birthYear: year }),
       currency: "AUD",
       setCurrency: (currency) => set({ currency }),
+      hideLockedInTrend: true,
+      setHideLockedInTrend: (hidden) => set({ hideLockedInTrend: hidden }),
     }),
     {
       name: APP_SETTINGS_STORAGE_KEY,
@@ -34,6 +39,7 @@ export const useSettingsStore = create<SettingsState>()(
         displayName: state.displayName,
         birthYear: state.birthYear,
         currency: state.currency,
+        hideLockedInTrend: state.hideLockedInTrend,
       })
     }
   )

@@ -220,12 +220,15 @@ type AccountEntry = {
   name: string;
   value: number;
   kind: "asset" | "liability";
+  lockedUntilAge?: number;
 };
 
 type AccountSummary = {
   assets: number;
   liabilities: number;
   netWorth: number;
+  liquidNetWorth: number;
+  lockedAssets: number;
 };
 
 type ForecastPoint = {
@@ -316,6 +319,8 @@ function buildMonthLabel(month: string): string {
 export function DashboardTab({
   currency,
   accountSummary,
+  hideLockedInTrend,
+  onHideLockedInTrendChange,
   startNetWorth,
   monthlyForecastDelta,
   forecastPoints,
@@ -336,6 +341,8 @@ export function DashboardTab({
 }: {
   currency: string;
   accountSummary: AccountSummary;
+  hideLockedInTrend: boolean;
+  onHideLockedInTrendChange: (hidden: boolean) => void;
   startNetWorth: number;
   monthlyForecastDelta: number;
   forecastPoints: ForecastPoint[];
@@ -413,13 +420,41 @@ export function DashboardTab({
       : { start: clampedEnd, end: clampedStart };
   }, [accountEndMonth, accountHistoryBounds.max, accountHistoryBounds.min, accountStartMonth]);
 
+  const lockedAccountIds = useMemo(
+    () => new Set(accountEntries.filter((a) => a.lockedUntilAge !== undefined).map((a) => a.id)),
+    [accountEntries]
+  );
+  const hasLockedAccounts = lockedAccountIds.size > 0;
+
+  const visibleAccountHistorySeries = useMemo(() => {
+    if (!hideLockedInTrend || !hasLockedAccounts) return accountHistorySeries;
+    return accountHistorySeries.filter((s) => !lockedAccountIds.has(s.accountId));
+  }, [accountHistorySeries, hideLockedInTrend, hasLockedAccounts, lockedAccountIds]);
+
   const visibleAccountHistoryChartData = useMemo(() => {
-    if (!accountRange) return accountHistoryChartData;
-    return accountHistoryChartData.filter((row) => (
-      compareMonthValues(row.month, accountRange.start) >= 0 &&
-      compareMonthValues(row.month, accountRange.end) <= 0
-    ));
-  }, [accountHistoryChartData, accountRange]);
+    const rangeFiltered = !accountRange
+      ? accountHistoryChartData
+      : accountHistoryChartData.filter((row) => (
+          compareMonthValues(row.month, accountRange.start) >= 0 &&
+          compareMonthValues(row.month, accountRange.end) <= 0
+        ));
+    if (!hideLockedInTrend || !hasLockedAccounts) return rangeFiltered;
+    return rangeFiltered.map((row) => {
+      const next: AccountHistoryChartRow = { month: row.month, label: row.label, totalNetWorth: 0 };
+      let liquidTotal = 0;
+      for (const account of accountEntries) {
+        const key = `acct_${account.id}`;
+        if (lockedAccountIds.has(account.id)) continue;
+        const v = row[key];
+        if (typeof v === "number") {
+          next[key] = v;
+          liquidTotal += v;
+        }
+      }
+      next.totalNetWorth = Number(liquidTotal.toFixed(2));
+      return next;
+    });
+  }, [accountHistoryChartData, accountRange, hideLockedInTrend, hasLockedAccounts, lockedAccountIds, accountEntries]);
 
   const forecastRange = useMemo(() => {
     const start = compareMonthValues(forecastStartMonth || forecastDefaults.baseMonth, forecastDefaults.baseMonth) < 0
@@ -526,6 +561,11 @@ export function DashboardTab({
         <article className="border border-line rounded-md px-4 py-[0.9rem] bg-surface shadow-soft hover:border-line-strong transition-colors">
           <h2 className="text-[0.72rem] uppercase tracking-[0.12em] text-muted font-bold">Current Net Worth</h2>
           <p className="font-mono text-ink font-semibold tracking-[-0.03em] mt-[0.38rem] text-[clamp(1.2rem,1.8vw,1.55rem)]">{formatCurrency(startNetWorth, currency)}</p>
+          {accountSummary.lockedAssets > 0 ? (
+            <span className="text-[0.68rem] text-muted font-normal mt-[0.2rem] inline-block">
+              + {formatCurrency(accountSummary.lockedAssets, currency)} locked
+            </span>
+          ) : null}
         </article>
         <article className="border border-line rounded-md px-4 py-[0.9rem] bg-surface shadow-soft hover:border-line-strong transition-colors">
           <h2 className="text-[0.72rem] uppercase tracking-[0.12em] text-muted font-bold">Monthly Delta</h2>
@@ -545,9 +585,22 @@ export function DashboardTab({
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h3 className="font-display text-base tracking-[-0.02em] text-ink">Account Trend</h3>
-            <p className="text-muted text-[0.82rem] mt-[0.42rem]">Stacked area view by account over time.</p>
+            <p className="text-muted text-[0.82rem] mt-[0.42rem]">
+              Stacked area view by account over time.
+              {hasLockedAccounts && hideLockedInTrend ? " Locked accounts hidden." : null}
+            </p>
           </div>
           <div className="flex flex-wrap items-end gap-3">
+            {hasLockedAccounts ? (
+              <label className="flex items-center gap-[0.45rem] text-[0.78rem] text-ink-soft cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={hideLockedInTrend}
+                  onChange={(event) => onHideLockedInTrendChange(event.target.checked)}
+                />
+                <span>Hide locked accounts</span>
+              </label>
+            ) : null}
             <label className="grid gap-1 text-[0.72rem] uppercase tracking-[0.1em] text-muted font-bold">
               Start
               <input
@@ -614,7 +667,7 @@ export function DashboardTab({
                 stroke="rgba(61,36,56,0.15)"
                 strokeDasharray="4 4"
               />
-              {accountHistorySeries.map((series) => (
+              {visibleAccountHistorySeries.map((series) => (
                 <Area
                   key={series.accountId}
                   type="monotone"
