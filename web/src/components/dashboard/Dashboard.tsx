@@ -131,7 +131,7 @@ interface DashboardProps {
   onUpdateGoal: (id: string, patch: Partial<Omit<GoalEntry, "id">>) => void;
   onRemoveGoal: (id: string) => void;
   onAddAccountHistorySnapshot: () => void;
-  onUpdateAccountHistoryMonth: (snapshotId: string, month: string) => void;
+  onUpdateAccountHistoryDate: (snapshotId: string, date: string) => void;
   onUpdateAccountHistoryBalance: (snapshotId: string, accountId: string, value: number) => void;
   onRemoveAccountHistorySnapshot: (snapshotId: string) => void;
   onPayrollDraftChange: (patch: Partial<PayrollDraft>) => void;
@@ -292,7 +292,7 @@ export function Dashboard({
   onUpdateGoal,
   onRemoveGoal,
   onAddAccountHistorySnapshot,
-  onUpdateAccountHistoryMonth,
+  onUpdateAccountHistoryDate,
   onUpdateAccountHistoryBalance,
   onRemoveAccountHistorySnapshot,
   onPayrollDraftChange,
@@ -378,6 +378,7 @@ export function Dashboard({
             currency={derived.meta.currency}
             checkInDue={checkInDue}
             onStartCheckIn={onStartCheckIn}
+            payFrequency={payrollDraft.payFrequency}
           />
         </div>
 
@@ -405,6 +406,7 @@ export function Dashboard({
                 currency={derived.meta.currency}
                 checkInDue={checkInDue}
                 onStartCheckIn={onStartCheckIn}
+                payFrequency={payrollDraft.payFrequency}
                 className="w-full border-r-0"
                 showSummaryCards={false}
                 onNavigate={() => setIsMobileNavOpen(false)}
@@ -475,11 +477,12 @@ export function Dashboard({
               accountSummary={derived.accountSummary}
               accountEntries={accountEntries}
               accountHistorySnapshots={derived.accountHistorySorted}
+              payFrequency={payrollDraft.payFrequency}
               onAddAccount={onAddAccount}
               onUpdateAccount={onUpdateAccount}
               onRemoveAccount={onRemoveAccount}
               onAddAccountHistorySnapshot={onAddAccountHistorySnapshot}
-              onUpdateAccountHistoryMonth={onUpdateAccountHistoryMonth}
+              onUpdateAccountHistoryDate={onUpdateAccountHistoryDate}
               onUpdateAccountHistoryBalance={onUpdateAccountHistoryBalance}
               onRemoveAccountHistorySnapshot={onRemoveAccountHistorySnapshot}
             />

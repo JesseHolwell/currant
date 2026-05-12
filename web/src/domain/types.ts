@@ -124,7 +124,8 @@ export type ResolvedGoalEntry = GoalEntry & {
 
 export type AccountHistorySnapshot = {
   id: string;
-  month: string;
+  /** ISO date (YYYY-MM-DD) the snapshot was recorded for. */
+  date: string;
   balances: Record<string, number>;
 };
 

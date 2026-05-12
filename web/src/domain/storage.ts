@@ -97,10 +97,18 @@ export function parseStoredAccountHistory(raw: unknown): AccountHistorySnapshot[
     }
     const candidate = item as {
       id?: unknown;
+      date?: unknown;
       month?: unknown;
       balances?: unknown;
     };
-    if (typeof candidate.month !== "string" || !/^\d{4}-\d{2}$/.test(candidate.month)) {
+    let date: string | null = null;
+    if (typeof candidate.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(candidate.date)) {
+      date = candidate.date;
+    } else if (typeof candidate.month === "string" && /^\d{4}-\d{2}$/.test(candidate.month)) {
+      // Legacy month-keyed snapshot — pin to first of the month.
+      date = `${candidate.month}-01`;
+    }
+    if (!date) {
       continue;
     }
     const balances: Record<string, number> = {};
@@ -115,11 +123,11 @@ export function parseStoredAccountHistory(raw: unknown): AccountHistorySnapshot[
     }
     next.push({
       id: typeof candidate.id === "string" && candidate.id.trim().length > 0 ? candidate.id : createLocalId("acct_hist"),
-      month: candidate.month,
+      date,
       balances
     });
   }
-  return next.sort((a, b) => a.month.localeCompare(b.month));
+  return next.sort((a, b) => a.date.localeCompare(b.date));
 }
 
 export function parseStoredRawTransactions(raw: unknown): RawTransaction[] {

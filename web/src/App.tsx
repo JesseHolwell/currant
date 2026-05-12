@@ -71,20 +71,18 @@ import type {
   TransactionDraft
 } from "./domain";
 
-function currentMonthValue(): string {
+function currentDateValue(): string {
   const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }
 
-function nextMonthValue(month: string): string {
-  const [yearRaw, monthRaw] = month.split("-");
-  const year = Number(yearRaw);
-  const monthIndex = Number(monthRaw) - 1;
-  if (!Number.isFinite(year) || !Number.isFinite(monthIndex)) {
-    return currentMonthValue();
+function nextSnapshotDate(previousDate: string, cadenceDays: number): string {
+  const parsed = new Date(`${previousDate}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) {
+    return currentDateValue();
   }
-  const nextDate = new Date(year, monthIndex + 1, 1);
-  return `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, "0")}`;
+  parsed.setDate(parsed.getDate() + cadenceDays);
+  return `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, "0")}-${String(parsed.getDate()).padStart(2, "0")}`;
 }
 
 const APP_BACKUP_VERSION = 1;
@@ -551,14 +549,16 @@ export default function App() {
 
   function addAccountHistorySnapshot(): void {
     setAccountHistory((prev) => {
-      const sorted = [...prev].sort((a, b) => a.month.localeCompare(b.month));
-      const seedMonth = sorted.length === 0 ? currentMonthValue() : nextMonthValue(sorted[sorted.length - 1].month);
+      const sorted = [...prev].sort((a, b) => a.date.localeCompare(b.date));
+      const seedDate = sorted.length === 0
+        ? currentDateValue()
+        : nextSnapshotDate(sorted[sorted.length - 1].date, payFreqDays);
       const latestSnapshot = sorted[sorted.length - 1];
       const balances: Record<string, number> = {};
       for (const account of accountEntries) {
         balances[account.id] = latestSnapshot?.balances[account.id] ?? Number(account.value.toFixed(2));
       }
-      return [...prev, { id: createLocalId("acct_hist"), month: seedMonth, balances }];
+      return [...prev, { id: createLocalId("acct_hist"), date: seedDate, balances }];
     });
   }
 
@@ -569,12 +569,12 @@ export default function App() {
       for (const account of accountEntries) {
         balances[account.id] = Number(account.value.toFixed(2));
       }
-      return [{ id: createLocalId("acct_hist"), month: currentMonthValue(), balances }];
+      return [{ id: createLocalId("acct_hist"), date: currentDateValue(), balances }];
     });
   }
 
-  function updateAccountHistoryMonth(snapshotId: string, month: string): void {
-    setAccountHistory((prev) => prev.map((s) => s.id === snapshotId ? { ...s, month } : s));
+  function updateAccountHistoryDate(snapshotId: string, date: string): void {
+    setAccountHistory((prev) => prev.map((s) => s.id === snapshotId ? { ...s, date } : s));
   }
 
   function updateAccountHistoryBalance(snapshotId: string, accountId: string, value: number): void {
@@ -1133,7 +1133,7 @@ export default function App() {
       onUpdateGoal={updateGoal}
       onRemoveGoal={removeGoal}
       onAddAccountHistorySnapshot={addAccountHistorySnapshot}
-      onUpdateAccountHistoryMonth={updateAccountHistoryMonth}
+      onUpdateAccountHistoryDate={updateAccountHistoryDate}
       onUpdateAccountHistoryBalance={updateAccountHistoryBalance}
       onRemoveAccountHistorySnapshot={removeAccountHistorySnapshot}
       onPayrollDraftChange={(patch) => setPayrollDraft((prev) => ({ ...prev, ...patch }))}

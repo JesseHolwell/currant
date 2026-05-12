@@ -1,5 +1,5 @@
-import { formatCurrency } from "../../domain";
-import type { AccountEntry, AccountHistorySnapshot } from "../../domain";
+import { formatCurrency, getCadenceLabels } from "../../domain";
+import type { AccountEntry, AccountHistorySnapshot, PayFrequency } from "../../domain";
 
 type AccountKind = "asset" | "liability";
 
@@ -14,11 +14,12 @@ export function AccountsTab({
   accountSummary,
   accountEntries,
   accountHistorySnapshots,
+  payFrequency,
   onAddAccount,
   onUpdateAccount,
   onRemoveAccount,
   onAddAccountHistorySnapshot,
-  onUpdateAccountHistoryMonth,
+  onUpdateAccountHistoryDate,
   onUpdateAccountHistoryBalance,
   onRemoveAccountHistorySnapshot
 }: {
@@ -26,14 +27,16 @@ export function AccountsTab({
   accountSummary: AccountSummary;
   accountEntries: AccountEntry[];
   accountHistorySnapshots: AccountHistorySnapshot[];
+  payFrequency: PayFrequency;
   onAddAccount: () => void;
   onUpdateAccount: (id: string, patch: Partial<Omit<AccountEntry, "id">>) => void;
   onRemoveAccount: (id: string) => void;
   onAddAccountHistorySnapshot: () => void;
-  onUpdateAccountHistoryMonth: (snapshotId: string, month: string) => void;
+  onUpdateAccountHistoryDate: (snapshotId: string, date: string) => void;
   onUpdateAccountHistoryBalance: (snapshotId: string, accountId: string, value: number) => void;
   onRemoveAccountHistorySnapshot: (snapshotId: string) => void;
 }) {
+  const cadence = getCadenceLabels(payFrequency);
   return (
     <>
       <section className="grid grid-cols-4 gap-[0.65rem]">
@@ -95,21 +98,21 @@ export function AccountsTab({
         <div className="flex items-center justify-between gap-3 mb-2">
           <h3 className="font-display text-base tracking-[-0.02em] text-ink">Account Balance History</h3>
           <button type="button" className="mode-btn active" onClick={onAddAccountHistorySnapshot}>
-            Add Month Snapshot
+            Add Snapshot
           </button>
         </div>
         <p className="text-muted text-[0.82rem] mt-[0.42rem]">
-          Enter monthly balances for each account. Liabilities should be entered as positive balances; they are treated as
-          negative in the chart.
+          Record balances each {cadence.noun} (or whenever you check in). Liabilities should be entered as positive balances;
+          they are treated as negative in the chart.
         </p>
         {accountHistorySnapshots.length === 0 ? (
-          <p className="text-muted text-[0.82rem] mt-[0.42rem]">No monthly snapshots yet. Add your first month to start the trend chart.</p>
+          <p className="text-muted text-[0.82rem] mt-[0.42rem]">No snapshots yet. Add your first check-in to start the trend chart.</p>
         ) : (
           <div className="overflow-x-auto mt-3">
             <table className="w-full border-collapse text-sm">
               <thead>
                 <tr>
-                  <th className="text-left font-semibold text-muted text-[0.72rem] uppercase tracking-[0.08em] py-[0.5rem] px-[0.6rem] border-b border-line">Month</th>
+                  <th className="text-left font-semibold text-muted text-[0.72rem] uppercase tracking-[0.08em] py-[0.5rem] px-[0.6rem] border-b border-line">Date</th>
                   {accountEntries.map((account) => (
                     <th key={account.id} className="text-left font-semibold text-muted text-[0.72rem] uppercase tracking-[0.08em] py-[0.5rem] px-[0.6rem] border-b border-line">{account.name || "Untitled Account"}</th>
                   ))}
@@ -121,10 +124,10 @@ export function AccountsTab({
                   <tr key={snapshot.id} className="hover:bg-[var(--bg-warm)] transition-colors">
                     <td className="py-[0.4rem] px-[0.5rem] border-b border-line">
                       <input
-                        type="month"
-                        value={snapshot.month}
+                        type="date"
+                        value={snapshot.date}
                         className="border border-line-strong bg-surface text-ink rounded-sm px-[0.6rem] py-[0.45rem] text-[0.83rem] focus:outline-none focus:border-[var(--accent-border)] focus:shadow-[0_0_0_3px_var(--accent-ring)]"
-                        onChange={(event) => onUpdateAccountHistoryMonth(snapshot.id, event.target.value)}
+                        onChange={(event) => onUpdateAccountHistoryDate(snapshot.id, event.target.value)}
                       />
                     </td>
                     {accountEntries.map((account) => (

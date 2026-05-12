@@ -1,6 +1,6 @@
 import './Sidebar.css';
-import { formatCurrency } from "../../domain";
-import type { DashboardTab, ResolvedGoalEntry } from "../../domain";
+import { formatCurrency, getCadenceLabels } from "../../domain";
+import type { DashboardTab, PayFrequency, ResolvedGoalEntry } from "../../domain";
 
 type AccountSummary = {
   netWorth: number;
@@ -99,6 +99,7 @@ export function Sidebar({
   currency,
   checkInDue,
   onStartCheckIn,
+  payFrequency,
   className = "",
   showSummaryCards = true,
   onNavigate,
@@ -111,10 +112,12 @@ export function Sidebar({
   currency: string;
   checkInDue: boolean;
   onStartCheckIn: () => void;
+  payFrequency: PayFrequency;
   className?: string;
   showSummaryCards?: boolean;
   onNavigate?: () => void;
 }) {
+  const cadence = getCadenceLabels(payFrequency);
   const handleTabChange = (tab: DashboardTab) => {
     onTabChange(tab);
     onNavigate?.();
@@ -148,14 +151,14 @@ export function Sidebar({
           type="button"
           className={checkInDue ? "nav-btn nav-btn-checkin nav-btn-checkin--due" : "nav-btn nav-btn-checkin"}
           onClick={handleStartCheckIn}
-          title={checkInDue ? "It's time for your monthly update" : "Monthly check-in"}
+          title={checkInDue ? `It's time for your ${cadence.adjective} update` : `${cadence.adjectiveTitle} check-in`}
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <rect x="2" y="3" width="12" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.4" opacity="0.7"/>
             <path d="M5 2v2M11 2v2M2 6.5h12" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" opacity="0.6"/>
             <path d="M5.5 10l1.5 1.5L11 8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          <span>Monthly Update</span>
+          <span>{cadence.adjectiveTitle} Update</span>
           {checkInDue && <span className="nav-checkin-dot" aria-label="Update due" />}
         </button>
       </nav>

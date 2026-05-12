@@ -11,6 +11,29 @@ export function getPayFrequencyMeta(frequency: PayFrequency) {
   return PAY_FREQUENCY_OPTIONS.find((option) => option.value === frequency) ?? PAY_FREQUENCY_OPTIONS[1];
 }
 
+export type CadenceLabels = {
+  /** "weekly" / "fortnightly" / "monthly" */
+  adjective: string;
+  /** "Weekly" / "Fortnightly" / "Monthly" */
+  adjectiveTitle: string;
+  /** "week" / "fortnight" / "month" */
+  noun: string;
+  /** Approximate days between periods (used for check-in cadence). */
+  days: number;
+};
+
+export function getCadenceLabels(frequency: PayFrequency): CadenceLabels {
+  switch (frequency) {
+    case "weekly":
+      return { adjective: "weekly", adjectiveTitle: "Weekly", noun: "week", days: 7 };
+    case "fortnightly":
+      return { adjective: "fortnightly", adjectiveTitle: "Fortnightly", noun: "fortnight", days: 14 };
+    case "monthly":
+    default:
+      return { adjective: "monthly", adjectiveTitle: "Monthly", noun: "month", days: 30 };
+  }
+}
+
 const VALID_FIELD_KINDS = new Set<PayrollFieldKind>(["pre_tax_deduction", "employer_contribution", "contribution_tax"]);
 
 function sanitizeField(raw: unknown): PayrollField | null {

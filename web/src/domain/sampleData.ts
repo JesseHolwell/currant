@@ -180,32 +180,32 @@ const SAMPLE_GOALS: GoalEntry[] = [
 const SAMPLE_ACCOUNT_HISTORY: AccountHistorySnapshot[] = [
   {
     id: "smpl_hist_jul",
-    month: "2024-07",
+    date: "2024-07-01",
     balances: { smpl_everyday: 5200, smpl_savings: 18000, smpl_etf: 16800, smpl_crypto: 3100, smpl_credit: 1200 },
   },
   {
     id: "smpl_hist_aug",
-    month: "2024-08",
+    date: "2024-08-01",
     balances: { smpl_everyday: 5400, smpl_savings: 19500, smpl_etf: 17200, smpl_crypto: 3200, smpl_credit: 1400 },
   },
   {
     id: "smpl_hist_sep",
-    month: "2024-09",
+    date: "2024-09-01",
     balances: { smpl_everyday: 5800, smpl_savings: 21000, smpl_etf: 18500, smpl_crypto: 3600, smpl_credit: 1300 },
   },
   {
     id: "smpl_hist_oct",
-    month: "2024-10",
+    date: "2024-10-01",
     balances: { smpl_everyday: 6000, smpl_savings: 22400, smpl_etf: 19200, smpl_crypto: 3900, smpl_credit: 1600 },
   },
   {
     id: "smpl_hist_nov",
-    month: "2024-11",
+    date: "2024-11-01",
     balances: { smpl_everyday: 5900, smpl_savings: 23600, smpl_etf: 20500, smpl_crypto: 4000, smpl_credit: 1700 },
   },
   {
     id: "smpl_hist_dec",
-    month: "2024-12",
+    date: "2024-12-01",
     balances: { smpl_everyday: 6240, smpl_savings: 24800, smpl_etf: 21500, smpl_crypto: 4200, smpl_credit: 1840 },
   },
 ];

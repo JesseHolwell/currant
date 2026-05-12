@@ -240,7 +240,7 @@ export function useDashboardState({
 
   const effectiveAccountEntries = useMemo(() => {
     if (accountHistory.length === 0) return accountEntries;
-    const latestSnapshot = [...accountHistory].sort((a, b) => b.month.localeCompare(a.month))[0];
+    const latestSnapshot = [...accountHistory].sort((a, b) => b.date.localeCompare(a.date))[0];
     return accountEntries.map((account) => {
       const historyValue = latestSnapshot.balances[account.id];
       return historyValue !== undefined ? { ...account, value: historyValue } : account;
@@ -276,7 +276,7 @@ export function useDashboardState({
   );
 
   const accountHistorySorted = useMemo(
-    () => [...accountHistory].sort((a, b) => a.month.localeCompare(b.month)),
+    () => [...accountHistory].sort((a, b) => a.date.localeCompare(b.date)),
     [accountHistory]
   );
 
@@ -301,12 +301,13 @@ export function useDashboardState({
 
   const accountHistoryChartData = useMemo<Array<{ month: string; label: string; [key: string]: string | number }>>(() => {
     return accountHistorySorted.map((snapshot) => {
-      const monthDate = new Date(`${snapshot.month}-01T00:00:00`);
+      const snapshotDate = new Date(`${snapshot.date}T00:00:00`);
+      const month = snapshot.date.slice(0, 7);
       const row: { month: string; label: string; [key: string]: number | string } = {
-        month: snapshot.month,
-        label: Number.isNaN(monthDate.getTime())
-          ? snapshot.month
-          : monthDate.toLocaleString("en-AU", { month: "short", year: "2-digit" }),
+        month,
+        label: Number.isNaN(snapshotDate.getTime())
+          ? snapshot.date
+          : snapshotDate.toLocaleString("en-AU", { month: "short", year: "2-digit" }),
         totalNetWorth: 0
       };
       let runningTotal = 0;
