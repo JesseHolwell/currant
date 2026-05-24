@@ -17,6 +17,7 @@
     "build:shell": "npm run build --workspace @currant/shell",
     "build:cash": "npm run build --workspace @currant/cash",
     "build:health": "npm run build --workspace @currant/health",
-    "build:mind": "npm run build --workspace @currant/mind"
+    "build:mind": "npm run build --workspace @currant/mind",
+    "build:all": "npm run build:shell && npm run build:cash && npm run build:health && npm run build:mind && node scripts/assemble-dist.mjs"
   }
 }

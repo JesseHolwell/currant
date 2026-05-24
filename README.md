@@ -13,8 +13,8 @@ Cash is currently solo on `currant.cash`)*.
 |---|---|---|
 | [Currant Cash](apps/cash/) | Finance — transactions, categories, forecasts, FIRE | shipping |
 | [Currant Health](apps/health/) | Body — workouts, weekly check-ins, measurements | scaffolded |
-| Currant Mind | Mental wellbeing — journal, mood, meditation | not started |
-| Currant Life | Cross-vertical aggregator + AI analytics | not started |
+| [Currant Mind](apps/mind/) | Mental wellbeing — daily tasks, mood, reflection | scaffolded |
+| Currant Life | Cross-vertical dashboard at `currant.au/` | shell's signed-in mode |
 
 ## Privacy model
 
@@ -111,6 +111,11 @@ See the "Adding a new vertical" section of [`CLAUDE.md`](CLAUDE.md) for the
 recipe. Short version: scaffold `apps/<name>/` as a sibling, add
 `"@currant/ui": "*"`, declare the required palette vars in `:root`, and add a
 per-app `CLAUDE.md` + `README.md`.
+
+## Deploying
+
+See [`DEPLOY.md`](DEPLOY.md). Single Vercel project builds all apps and
+serves them under one origin (`currant.au/`, `/cash`, `/health`, `/mind`).
 
 ## Product spec
 

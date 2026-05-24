@@ -14,15 +14,22 @@ eventual cross-app aggregator + AI layer.
 |---|---|---|
 | Currant Cash | Finance — transactions, categories, forecasts, FIRE | shipping |
 | Currant Health | Body — workouts, weekly check-ins, measurements | scaffolded |
-| Currant Mind | Mental wellbeing — journal, mood, meditation | not started |
-| Currant Life | Meta — aggregates from every vertical, AI layer | not started |
+| Currant Mind | Mental wellbeing — daily tasks, mood, reflection | scaffolded |
+| Currant Life | Cross-vertical dashboard | **not a separate vertical** — see below |
+
+**Life is the shell's signed-in mode**, not its own app. Signed-out visitors
+at `currant.au/` see the marketing landing; signed-in visitors see a Life
+dashboard (cross-vertical stats + pending nudges) at the same URL. The
+cross-app data reader lives in `apps/shell/src/lib/verticalData.ts` and is
+the only place that reads other verticals' localStorage directly.
 
 ## Repo layout
 
 ```
-apps/shell/     Currant suite shell — landing page, auth, vertical switcher (currant.au/)
+apps/shell/     Suite shell — marketing landing (signed out) + Life dashboard (signed in) at currant.au/
 apps/cash/      Currant Cash — finance dashboard (currant.au/cash)
 apps/health/    Currant Health — body/fitness tracker (currant.au/health)
+apps/mind/      Currant Mind — daily tasks + mood (currant.au/mind)
 apps/cli/       Bank-export ingest CLI for Cash (deprecated, optional)
 packages/auth/  Shared Supabase client + useAuth hook (@currant/auth)
 packages/ui/    Shared design tokens — fonts, radii, color slot bindings (@currant/ui)
@@ -43,11 +50,10 @@ to its own `dist/`. The hosting layer (Vercel rewrites / Cloudflare /
 nginx) routes paths to the right vertical:
 
 ```
-currant.au/         → apps/shell/dist     (landing + auth + switcher)
+currant.au/         → apps/shell/dist     (landing signed-out, Life dashboard signed-in)
 currant.au/cash/*   → apps/cash/dist      (Cash SPA)
 currant.au/health/* → apps/health/dist    (Health SPA)
-currant.au/mind/*   → apps/mind/dist      (future)
-currant.au/life/*   → apps/life/dist      (future)
+currant.au/mind/*   → apps/mind/dist      (Mind SPA)
 ```
 
 Why same origin matters: `localStorage` is origin-scoped and the Life
@@ -64,9 +70,10 @@ health: 5175). The shell's vertical-card links use `import.meta.env.DEV` to
 switch between `localhost:5174` (dev) and `/cash` (prod).
 
 **iOS:** separate App Store app per vertical (one icon, one purpose). Bundle
-ids follow reverse-DNS: `au.currant.cash`, `au.currant.health`, etc. Apps
-share an App Group (`group.au.currant`) so the Life app can read JSON the
-verticals write into the shared container.
+ids follow reverse-DNS: `au.currant.cash`, `au.currant.health`, `au.currant.mind`.
+The shell ships as `au.currant.life` — the iOS app whose home is the Life
+dashboard. All apps share an App Group (`group.au.currant`) so Life can
+read JSON the verticals write into the shared container.
 
 ## Conventions across all apps
 

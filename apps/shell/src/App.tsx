@@ -1,77 +1,26 @@
-import { useAuth, isSupabaseConfigured } from "@currant/auth";
+import { isSupabaseConfigured, useAuth } from "@currant/auth";
+import { LandingPage } from "./features/landing/LandingPage";
+import { LifeDashboard } from "./features/life/LifeDashboard";
 
-type VerticalStatus = "shipping" | "scaffolded" | "planned";
+/**
+ * Suite shell, two modes:
+ *   - Signed out → marketing landing + sign-in.
+ *   - Signed in  → Life dashboard (cross-vertical overview).
+ *
+ * Life isn't a separate vertical — it's what the shell becomes once you're
+ * authenticated. Same URL (`currant.au/`), same codebase, different content.
+ */
 
-type Vertical = {
-  id: "cash" | "health" | "mind" | "life";
-  name: string;
-  tagline: string;
-  description: string;
-  status: VerticalStatus;
-  /** Vite dev port for this vertical, when running locally. */
-  devPort?: number;
-  /**
-   * Production path under currant.au. The server (Vercel rewrites / nginx /
-   * Cloudflare) routes this path to the vertical's built `dist/`. Same
-   * origin as the shell so localStorage and Supabase cookies are shared.
-   */
-  productionPath: string;
-};
-
-const VERTICALS: Vertical[] = [
-  {
-    id: "cash",
-    name: "Currant Cash",
-    tagline: "Money you can see.",
-    description:
-      "Import bank CSVs, categorise spending, forecast cash flow, and run FIRE projections — all local-first.",
-    status: "shipping",
-    devPort: 5174,
-    productionPath: "/cash"
-  },
-  {
-    id: "health",
-    name: "Currant Health",
-    tagline: "Body you can measure.",
-    description:
-      "Workouts, weekly check-ins, and body measurements. Low-friction logging, useful graphs.",
-    status: "scaffolded",
-    devPort: 5175,
-    productionPath: "/health"
-  },
-  {
-    id: "mind",
-    name: "Currant Mind",
-    tagline: "Wellbeing you can track.",
-    description:
-      "Daily habits, mood, and reflection. Tap your tasks off, set a mood, watch your trends.",
-    status: "scaffolded",
-    devPort: 5176,
-    productionPath: "/mind"
-  },
-  {
-    id: "life",
-    name: "Currant Life",
-    tagline: "Everything, together.",
-    description:
-      "The meta dashboard. Read across every vertical, spot patterns, and ask Currant AI questions about your whole life.",
-    status: "planned",
-    productionPath: "/life"
-  }
-];
-
-function hrefFor(vertical: Vertical): string {
-  if (import.meta.env.DEV && vertical.devPort) {
-    return `http://localhost:${vertical.devPort}`;
-  }
-  return vertical.productionPath;
+/**
+ * Dev affordance: appending `?dev=life` in development renders the signed-in
+ * Life dashboard without requiring an actual Google sign-in. Strictly gated
+ * to `import.meta.env.DEV` so the override doesn't exist in production.
+ */
+function isDevForcedLife(): boolean {
+  if (!import.meta.env.DEV) return false;
+  if (typeof window === "undefined") return false;
+  return new URLSearchParams(window.location.search).get("dev") === "life";
 }
-
-const STATUS_LABEL: Record<VerticalStatus, string> = {
-  shipping: "Shipping",
-  scaffolded: "In progress",
-  planned: "Planned"
-};
 
 export default function App() {
   const { user, authLoading, signInWithGoogle, signOut } = useAuth();
@@ -80,16 +29,18 @@ export default function App() {
     return <CenteredPage>Loading…</CenteredPage>;
   }
 
+  const forceLife = isDevForcedLife();
+  const effectiveEmail = user?.email ?? (forceLife ? "dev@currant.au" : null);
+  const showLife = Boolean(user) || forceLife;
+
   return (
     <div className="min-h-dvh">
-      <Header user={user?.email ?? null} onSignOut={signOut} />
-      <main className="mx-auto max-w-5xl px-6 pb-24 pt-12 sm:pt-16">
-        <Hero />
-        {!user && <SignInPrompt onSignIn={signInWithGoogle} />}
-        {user && <SwitcherIntro />}
-        <VerticalGrid signedIn={Boolean(user)} />
-        <SuiteFooter />
-      </main>
+      <Header user={effectiveEmail} onSignOut={signOut} />
+      {showLife ? (
+        <LifeDashboard userEmail={effectiveEmail} />
+      ) : (
+        <LandingPage onSignIn={signInWithGoogle} canSignIn={isSupabaseConfigured} />
+      )}
     </div>
   );
 }
@@ -98,12 +49,10 @@ function Header({ user, onSignOut }: { user: string | null; onSignOut: () => voi
   return (
     <header className="border-b border-line">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-        <div className="flex items-baseline gap-2">
-          <span className="font-display text-xl font-semibold tracking-tight text-ink">
-            Currant
-          </span>
+        <a href="/" className="flex items-baseline gap-2">
+          <span className="font-display text-xl font-semibold tracking-tight text-ink">Currant</span>
           <span className="text-xs uppercase tracking-[0.18em] text-muted">suite</span>
-        </div>
+        </a>
         {user && (
           <div className="flex items-center gap-3 text-sm">
             <span className="hidden text-muted sm:inline">{user}</span>
@@ -117,142 +66,6 @@ function Header({ user, onSignOut }: { user: string | null; onSignOut: () => voi
         )}
       </div>
     </header>
-  );
-}
-
-function Hero() {
-  return (
-    <section className="mb-12">
-      <p className="text-xs uppercase tracking-[0.22em] text-muted">A suite of local-first life trackers</p>
-      <h1 className="mt-3 font-display text-5xl font-semibold leading-[1.05] tracking-tight text-ink sm:text-6xl">
-        Track your money,<br />body, and mind.<br />
-        <span className="text-accent">All in one place.</span>
-      </h1>
-      <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted">
-        Four small apps that share one login and one dataset. Your data lives on your device by
-        default. When you want it everywhere, sync turns on with a switch.
-      </p>
-    </section>
-  );
-}
-
-function SignInPrompt({ onSignIn }: { onSignIn: () => void }) {
-  if (!isSupabaseConfigured) {
-    return (
-      <section className="mb-12 rounded-2xl border border-line bg-surface p-6">
-        <p className="font-semibold text-ink">Local-only mode</p>
-        <p className="mt-1 text-sm text-muted">
-          Cloud sync isn't configured for this build. The verticals work fully offline — open
-          one below to get started.
-        </p>
-      </section>
-    );
-  }
-
-  return (
-    <section className="mb-12 rounded-2xl border border-line bg-surface p-6 sm:flex sm:items-center sm:justify-between sm:gap-6">
-      <div>
-        <p className="font-semibold text-ink">One account, every vertical</p>
-        <p className="mt-1 max-w-xl text-sm text-muted">
-          Sign in once and Cash, Health, Mind, and Life all unlock together. Or skip — the
-          apps work fully without an account.
-        </p>
-      </div>
-      <button
-        onClick={onSignIn}
-        className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 sm:mt-0 sm:w-auto"
-      >
-        Sign in with Google
-      </button>
-    </section>
-  );
-}
-
-function SwitcherIntro() {
-  return (
-    <section className="mb-8">
-      <h2 className="font-display text-2xl font-semibold text-ink">Pick a vertical</h2>
-      <p className="mt-1 text-sm text-muted">
-        You're signed in across the suite. Open any of these to start working.
-      </p>
-    </section>
-  );
-}
-
-function VerticalGrid({ signedIn }: { signedIn: boolean }) {
-  return (
-    <section className="grid gap-4 sm:grid-cols-2">
-      {VERTICALS.map((v) => (
-        <VerticalCard key={v.id} vertical={v} signedIn={signedIn} />
-      ))}
-    </section>
-  );
-}
-
-function VerticalCard({ vertical, signedIn }: { vertical: Vertical; signedIn: boolean }) {
-  const clickable = vertical.status !== "planned";
-  const href = hrefFor(vertical);
-
-  const cardClasses =
-    "group relative flex flex-col rounded-2xl border border-line bg-surface p-6 transition" +
-    (clickable
-      ? " hover:-translate-y-0.5 hover:border-accent hover:shadow-lg"
-      : " opacity-70");
-
-  const inner = (
-    <>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <span className={`h-2.5 w-2.5 rounded-full dot-${vertical.id}`} aria-hidden />
-          <span className="font-display text-lg font-semibold text-ink">{vertical.name}</span>
-        </div>
-        <StatusBadge status={vertical.status} />
-      </div>
-      <p className="mt-3 font-display text-xl font-medium italic text-ink">{vertical.tagline}</p>
-      <p className="mt-2 text-sm leading-relaxed text-muted">{vertical.description}</p>
-      {clickable && (
-        <span className="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-accent">
-          {signedIn ? "Open" : "Try it"}
-          <span aria-hidden className="transition group-hover:translate-x-0.5">→</span>
-        </span>
-      )}
-    </>
-  );
-
-  if (!clickable) {
-    return <div className={cardClasses}>{inner}</div>;
-  }
-
-  return (
-    <a href={href} className={cardClasses}>
-      {inner}
-    </a>
-  );
-}
-
-function StatusBadge({ status }: { status: VerticalStatus }) {
-  const tone = {
-    shipping: "bg-accent-soft text-accent",
-    scaffolded: "bg-accent-soft text-accent",
-    planned: "bg-transparent text-muted"
-  }[status];
-  return (
-    <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider ${tone}`}>
-      {STATUS_LABEL[status]}
-    </span>
-  );
-}
-
-function SuiteFooter() {
-  return (
-    <footer className="mt-20 border-t border-line pt-6 text-xs text-muted">
-      <p>
-        Currant is local-first. Your data lives on your device. Cloud sync is optional.
-      </p>
-      <p className="mt-1">
-        currant.au · one suite, one login, four apps.
-      </p>
-    </footer>
   );
 }
 

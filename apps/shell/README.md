@@ -34,6 +34,14 @@ Copy `.env.example` to `.env.local` and paste the Supabase project values —
 the shell points at the same project as Cash. Without env vars the shell
 shows a "Local-only mode" notice and the cards still link to each vertical.
 
+## Dev affordance: `?dev=life`
+
+In development (`import.meta.env.DEV`), appending `?dev=life` to the URL
+forces the Life dashboard to render with a placeholder email, even when not
+signed in. Useful for iterating on the dashboard without going through
+Google OAuth each time. Gated to dev builds only — the production bundle
+ignores the param.
+
 ## What's here vs. what's planned
 
 | | Status |
