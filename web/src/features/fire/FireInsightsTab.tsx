@@ -11,6 +11,7 @@ import {
   YAxis,
 } from "recharts";
 import { formatCurrency } from "../../domain";
+import { ChartTooltip } from "../../components/dashboard/ChartTooltip";
 
 type ProjectionPoint = {
   age: number;
@@ -285,14 +286,12 @@ export function FireInsightsTab({
                   tickFormatter={(v) => formatCurrency(Number(v), currency)}
                 />
                 <Tooltip
-                  formatter={(v: number) => [formatCurrency(Number(v), currency), "Net Worth"]}
-                  labelFormatter={(label) => `Age ${label}`}
-                  contentStyle={{
-                    background: "#3D2438",
-                    border: "1px solid rgba(61,36,56,0.2)",
-                    borderRadius: "6px",
-                    color: "#F7F3E8",
-                  }}
+                  content={
+                    <ChartTooltip
+                      formatter={(value) => formatCurrency(value, currency)}
+                      labelFormatter={(label) => `Age ${label}`}
+                    />
+                  }
                 />
                 {coastFireNumber > 0 && coastFireNumber < fireNumber ? (
                   <ReferenceLine

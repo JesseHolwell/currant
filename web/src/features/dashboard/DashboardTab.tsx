@@ -19,6 +19,7 @@ import {
   YAxis,
 } from "recharts";
 import { formatCurrency, formatTimelineLabel } from "../../domain";
+import { ChartTooltip } from "../../components/dashboard/ChartTooltip";
 
 function GoalCrossoverBadge({ viewBox, label }: { viewBox?: { x: number; y: number; height: number }; label: string }) {
   if (!viewBox) return null;
@@ -651,15 +652,12 @@ export function DashboardTab({
                 }
               />
               <Tooltip
-                formatter={(value: number) =>
-                  formatCurrency(Number(value), currency)
+                content={
+                  <ChartTooltip
+                    formatter={(value) => formatCurrency(value, currency)}
+                    showTotal
+                  />
                 }
-                contentStyle={{
-                  background: "#3D2438",
-                  border: "1px solid rgba(61,36,56,0.2)",
-                  borderRadius: "6px",
-                  color: "#F7F3E8",
-                }}
               />
               <Legend />
               <ReferenceLine
@@ -762,15 +760,11 @@ export function DashboardTab({
                 }
               />
               <Tooltip
-                formatter={(value: number) =>
-                  formatCurrency(Number(value), currency)
+                content={
+                  <ChartTooltip
+                    formatter={(value) => formatCurrency(value, currency)}
+                  />
                 }
-                contentStyle={{
-                  background: "#3D2438",
-                  border: "1px solid rgba(61,36,56,0.2)",
-                  borderRadius: "6px",
-                  color: "#F7F3E8",
-                }}
               />
               {maxGoalTarget > 0 ? (
                 <Line
@@ -842,13 +836,11 @@ export function DashboardTab({
                       ))}
                     </Pie>
                     <Tooltip
-                      formatter={(value: number) => formatCurrency(Number(value), currency)}
-                      contentStyle={{
-                        background: "#3D2438",
-                        border: "1px solid rgba(61,36,56,0.2)",
-                        borderRadius: "6px",
-                        color: "#F7F3E8",
-                      }}
+                      content={
+                        <ChartTooltip
+                          formatter={(value) => formatCurrency(value, currency)}
+                        />
+                      }
                     />
                     <Legend />
                   </PieChart>
@@ -888,13 +880,11 @@ export function DashboardTab({
                       ))}
                     </Pie>
                     <Tooltip
-                      formatter={(value: number) => formatCurrency(Number(value), currency)}
-                      contentStyle={{
-                        background: "#3D2438",
-                        border: "1px solid rgba(61,36,56,0.2)",
-                        borderRadius: "6px",
-                        color: "#F7F3E8",
-                      }}
+                      content={
+                        <ChartTooltip
+                          formatter={(value) => formatCurrency(value, currency)}
+                        />
+                      }
                     />
                     <Legend />
                   </PieChart>
@@ -921,13 +911,11 @@ export function DashboardTab({
                   tickFormatter={(value) => formatCurrency(Number(value), currency)}
                 />
                 <Tooltip
-                  formatter={(value: number) => formatCurrency(Number(value), currency)}
-                  contentStyle={{
-                    background: "#3D2438",
-                    border: "1px solid rgba(61,36,56,0.2)",
-                    borderRadius: "6px",
-                    color: "#F7F3E8",
-                  }}
+                  content={
+                    <ChartTooltip
+                      formatter={(value) => formatCurrency(value, currency)}
+                    />
+                  }
                 />
                 <Legend />
                 {monthlyExpenseData.categories.map((categoryConfig, index) => (

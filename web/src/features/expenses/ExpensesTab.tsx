@@ -10,6 +10,7 @@ import type {
   TimelinePeriod
 } from "../../domain";
 import { FlowTooltip, LinkShape, NodeShape } from "../../sankeyShapes";
+import { ChartTooltip } from "../../components/dashboard/ChartTooltip";
 
 const SPEND_PALETTE = [
   "#5C1A2A",
@@ -349,8 +350,11 @@ export function ExpensesTab({
                 <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: "#9E7088", fontSize: 12 }} />
                 <YAxis hide />
                 <Tooltip
-                  formatter={(value: number, name: string) => [formatCurrency(Number(value), currency), name]}
-                  contentStyle={{ background: "#3D2438", border: "none", borderRadius: "8px", color: "#F7F3E8", fontSize: "13px" }}
+                  content={
+                    <ChartTooltip
+                      formatter={(value) => formatCurrency(value, currency)}
+                    />
+                  }
                   cursor={{ fill: "rgba(139,41,66,0.06)" }}
                 />
                 {monthlyExpenseData.categories.map((cat, index) => (
