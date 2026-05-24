@@ -4,8 +4,8 @@ A suite of local-first life-tracking apps. Each vertical is its own product;
 they share auth, design language, and an eventual cross-app aggregator
 (Currant Life) plus AI layer.
 
-Production domain: `currant.au` *(suite goes live here once Life is ready;
-Cash is currently solo on `currant.cash`)*.
+Production domain: `currant.cash` (or the Vercel preview URL). `currant.au`
+may be acquired later but nothing in the code requires it.
 
 ## The suite
 
@@ -73,10 +73,10 @@ Each app has its own README with vertical-specific instructions:
 ## How the suite fits together
 
 **Web — per-app builds on one origin.** Each vertical builds independently
-to its own `dist/`. The host (Vercel/Cloudflare/nginx) rewrites paths to
-the right vertical: `/` → shell, `/cash/*` → cash, `/health/*` → health.
-Same origin matters because `localStorage` and Supabase cookies are
-origin-scoped and the Life aggregator needs to read across every vertical.
+to its own `dist/`. A single Vercel project serves them under one origin:
+`/` → shell, `/cash/*` → cash, `/health/*` → health, `/mind/*` → mind. Same
+origin matters because `localStorage` and Supabase cookies are origin-scoped
+and the Life dashboard needs to read across every vertical.
 
 Per-app builds (instead of a single SPA with lazy routes) keeps each
 vertical standalone — no shared mount points, independent deploys, better

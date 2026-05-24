@@ -1,5 +1,5 @@
 /*
- * Marketing landing for currant.au — shown to signed-out visitors only.
+ * Marketing landing — shown to signed-out visitors only.
  *
  * Once a user signs in, the shell swaps to LifeDashboard. So this surface
  * is purely about "what is Currant" and "create your account".
@@ -202,7 +202,7 @@ function WhatYouGetSection() {
       />
       <Block
         title="One signed-in home"
-        body="When you sign in to currant.au, you get a Life dashboard — your current weight, mood streak, net worth, and the things you need to log today. All in one place."
+        body="When you sign in, your home becomes a Life dashboard — your current weight, mood streak, net worth, and the things you need to log today. All in one place."
       />
     </section>
   );
@@ -221,7 +221,7 @@ function SuiteFooter() {
   return (
     <footer className="mt-20 border-t border-line pt-6 text-xs text-muted">
       <p>Currant is local-first. Your data lives on your device. Cloud sync is optional.</p>
-      <p className="mt-1">currant.au · one suite, one login, three apps.</p>
+      <p className="mt-1">currant.cash · one suite, one login, three apps.</p>
     </footer>
   );
 }

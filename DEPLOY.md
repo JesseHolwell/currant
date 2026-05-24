@@ -5,14 +5,18 @@ The whole suite ships as **one Vercel project** that builds every app
 serves them under one origin:
 
 ```
-currant.au/         → apps/shell/dist   (landing + Life dashboard)
-currant.au/cash/    → apps/cash/dist
-currant.au/health/  → apps/health/dist
-currant.au/mind/    → apps/mind/dist
+<origin>/         → apps/shell/dist   (landing + Life dashboard)
+<origin>/cash/    → apps/cash/dist
+<origin>/health/  → apps/health/dist
+<origin>/mind/    → apps/mind/dist
 ```
 
 Same origin matters — `localStorage` is origin-scoped and the Life
 dashboard reads across every vertical. Subdomains would break that.
+
+**Current production URL:** `currant.cash` (or the project's `*.vercel.app`
+URL — both work, both are the same origin family from Vercel's perspective).
+`currant.au` may be acquired later; nothing in the code requires it.
 
 ## How it works
 
@@ -27,19 +31,33 @@ dashboard reads across every vertical. Subdomains would break that.
   references `./assets/...` — relative paths resolve correctly under any
   sub-path.
 
-## First-time setup
+## Migrating the existing Vercel project
 
-### 1. Vercel project
+There's already a Vercel project deployed for Currant Cash from before the
+monorepo restructure. It needs a small reconfiguration to pick up the new
+multi-app build.
 
-1. **Import** the repo in Vercel.
-2. **Framework Preset:** `Other` (Vercel reads `vercel.json` for the rest).
-3. **Root Directory:** repo root (default).
-4. **Install Command:** `npm install` (default).
-5. **Build Command:** leave as inherited from `vercel.json`.
-6. **Output Directory:** leave as inherited from `vercel.json`.
-7. **Node Version:** 20.x or 22.x (both work).
+1. **Open the project in Vercel → Settings → General.**
+2. **Root Directory:** make sure this is **empty / `.`** (repo root), not
+   `web` or `apps/cash`. The `vercel.json` lives at the repo root and
+   handles routing for all four apps. If Root Directory points at a
+   sub-folder, Vercel will look for `vercel.json` inside that folder and
+   miss the suite-wide config.
+3. **Framework Preset:** `Other` (let `vercel.json` drive the build).
+4. **Build Command:** leave blank (inherits `npm run build:all` from
+   `vercel.json`).
+5. **Output Directory:** leave blank (inherits `dist` from `vercel.json`).
+6. **Install Command:** `npm install` (default).
+7. **Node Version:** 20.x or 22.x.
 
-### 2. Environment variables
+Click **Save**, then trigger a redeploy from the **Deployments** tab
+(latest commit → ⋯ → Redeploy).
+
+If anything goes wrong and the project is too tangled to debug, you can
+also delete the old project and re-import — DNS for `currant.cash` and the
+Supabase URL allow-list are the only things to re-wire (see below).
+
+## Environment variables
 
 Set these in Vercel **Project Settings → Environment Variables**, scope to
 **Production + Preview + Development**:
@@ -55,41 +73,43 @@ Vercel injects these at build time. Every app that uses `@currant/auth`
 > Health and Mind don't use Supabase yet — env vars are harmless if
 > present.
 
-### 3. Supabase redirect URLs
+## Supabase redirect URLs
 
-In **Supabase Dashboard → Authentication → URL Configuration**, add both
-the production and local origins to the allowed redirect list:
+In **Supabase Dashboard → Authentication → URL Configuration**, the
+allowed redirect list needs every origin that might initiate sign-in:
 
 ```
-https://currant.au
-https://currant.au/
+https://currant.cash
+https://currant.cash/
 https://*.vercel.app          # preview deploys
 http://localhost:5170         # shell
 http://localhost:5174         # cash
-http://localhost:5175         # health (no auth yet, but harmless)
-http://localhost:5176         # mind   (no auth yet, but harmless)
+http://localhost:5175         # health (no auth yet — harmless)
+http://localhost:5176         # mind   (no auth yet — harmless)
 ```
 
 The auth flow uses `window.location.origin` as the `redirectTo`, so every
-origin you might sign in from needs to be allow-listed.
+origin you might sign in from needs to be allow-listed. Add additional
+URLs (e.g. `currant.au`) later as you acquire them.
 
-### 4. Custom domain
+## Custom domain
 
-1. In **Vercel → Domains**, add `currant.au` and `www.currant.au`.
-2. In your DNS provider, point an `A` record (or `ALIAS`/`ANAME`) for
-   `currant.au` to Vercel's IPs, and a `CNAME` for `www.currant.au` to
-   `cname.vercel-dns.com`. Vercel's UI walks you through the exact values.
-3. Vercel auto-provisions a TLS cert via Let's Encrypt.
+`currant.cash` should already be pointed at the existing Vercel project. If
+not, in **Vercel → Domains**, add `currant.cash` and `www.currant.cash`,
+then follow Vercel's DNS instructions at your registrar.
+
+The Vercel preview URL (`<project>.vercel.app`) is always live and is fine
+to share / test against.
 
 ## Verifying a deploy
 
-After Vercel finishes building, check:
+After Vercel finishes building, check on whichever origin you're using:
 
-- `https://currant.au/` — marketing landing (signed-out)
-- `https://currant.au/cash/` — Cash SPA loads, no console errors
-- `https://currant.au/health/` — Health SPA loads
-- `https://currant.au/mind/` — Mind SPA loads
-- Sign in via Google → returns to `currant.au/` showing the Life dashboard
+- `<origin>/` — marketing landing (signed-out)
+- `<origin>/cash/` — Cash SPA loads, no console errors
+- `<origin>/health/` — Health SPA loads
+- `<origin>/mind/` — Mind SPA loads
+- Sign in via Google → returns to `<origin>/` showing the Life dashboard
 
 ## Local production-mode preview
 
@@ -119,7 +139,7 @@ needed.
 ## Things that aren't deployed (yet)
 
 - **iOS apps.** Capacitor wrappers per vertical ship via TestFlight, not
-  Vercel. See [`apps/cash/README.md`](apps/cash/README.md) for the iOS
-  build process. Bundle ids: `au.currant.{cash,health,mind,life}`.
-- **`@currant/cli`.** The bank-CSV ingest CLI is a local dev tool, not a
-  shippable artifact.
+  Vercel. Bundle ids are `au.currant.{cash,health,mind,life}` — aspirational
+  (not tied to a domain you need to own; reverse-DNS is just a naming
+  convention).
+- **`@currant/cli`.** The bank-CSV ingest CLI is a local dev tool.

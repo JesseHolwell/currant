@@ -18,7 +18,7 @@ eventual cross-app aggregator + AI layer.
 | Currant Life | Cross-vertical dashboard | **not a separate vertical** — see below |
 
 **Life is the shell's signed-in mode**, not its own app. Signed-out visitors
-at `currant.au/` see the marketing landing; signed-in visitors see a Life
+at the origin root see the marketing landing; signed-in visitors see a Life
 dashboard (cross-vertical stats + pending nudges) at the same URL. The
 cross-app data reader lives in `apps/shell/src/lib/verticalData.ts` and is
 the only place that reads other verticals' localStorage directly.
@@ -42,18 +42,19 @@ docs/           Product docs
 
 ## Deployment model (committed direction)
 
-**Production domain:** `currant.au`. The previously-owned `currant.cash` is
-held but will redirect once the suite ships.
+**Production domain:** `currant.cash` (the only Currant domain currently
+owned). `currant.au` is aspirational — may be acquired later, but nothing
+in the code requires it.
 
 **Web — per-app builds on one origin.** Each vertical builds independently
-to its own `dist/`. The hosting layer (Vercel rewrites / Cloudflare /
-nginx) routes paths to the right vertical:
+to its own `dist/`. Vercel serves them under one origin (currant.cash, or
+the project's `*.vercel.app` URL — both work):
 
 ```
-currant.au/         → apps/shell/dist     (landing signed-out, Life dashboard signed-in)
-currant.au/cash/*   → apps/cash/dist      (Cash SPA)
-currant.au/health/* → apps/health/dist    (Health SPA)
-currant.au/mind/*   → apps/mind/dist      (Mind SPA)
+currant.cash/         → apps/shell/dist     (landing signed-out, Life dashboard signed-in)
+currant.cash/cash/*   → apps/cash/dist      (Cash SPA)
+currant.cash/health/* → apps/health/dist    (Health SPA)
+currant.cash/mind/*   → apps/mind/dist      (Mind SPA)
 ```
 
 Why same origin matters: `localStorage` is origin-scoped and the Life

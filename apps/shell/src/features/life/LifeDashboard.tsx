@@ -347,7 +347,7 @@ function SuiteFooter() {
   return (
     <footer className="mt-20 border-t border-line pt-6 text-xs text-muted">
       <p>Currant is local-first. Your data lives on your device. Cloud sync is optional.</p>
-      <p className="mt-1">currant.au · one suite, one login, three apps.</p>
+      <p className="mt-1">currant.cash · one suite, one login, three apps.</p>
     </footer>
   );
 }

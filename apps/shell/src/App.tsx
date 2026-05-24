@@ -8,7 +8,7 @@ import { LifeDashboard } from "./features/life/LifeDashboard";
  *   - Signed in  → Life dashboard (cross-vertical overview).
  *
  * Life isn't a separate vertical — it's what the shell becomes once you're
- * authenticated. Same URL (`currant.au/`), same codebase, different content.
+ * authenticated. Same URL (origin root), same codebase, different content.
  */
 
 /**
