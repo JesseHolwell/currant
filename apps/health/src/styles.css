@@ -1,0 +1,44 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,300&family=JetBrains+Mono:wght@400;500;600&display=swap");
+@import "tailwindcss";
+
+/*
+ * Health uses the same typographic + shape DNA as Cash, but with its own
+ * accent palette so the trajectory dashboard can colour-code by app.
+ * When packages/ui lands, the shared @theme tokens move there and each app
+ * keeps only its accent overrides here.
+ */
+
+@theme {
+  --font-sans:    "DM Sans", system-ui, -apple-system, sans-serif;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-mono:    "JetBrains Mono", monospace;
+
+  --radius-sm: 0.125rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+}
+
+:root {
+  /* Health accent — verdant green (vs. cash's currant red). Placeholder;
+     tune once the design language is shared in packages/ui. */
+  --accent: #2f9e6b;
+  --accent-soft: #d8efe2;
+  --ink: #1a2421;
+  --muted: #6b7a74;
+  --surface: #faf8f3;
+  --line: #e6e1d6;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--ink);
+  background: var(--surface);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

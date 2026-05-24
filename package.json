@@ -10,6 +10,8 @@
     "ingest": "npm run ingest --workspace @personal-spend/cli --",
     "cash": "npm run dev --workspace @personal-spend/web",
     "web": "npm run dev --workspace @personal-spend/web",
-    "build": "npm run build --workspace @personal-spend/web"
+    "health": "npm run dev --workspace @currant/health",
+    "build": "npm run build --workspace @personal-spend/web",
+    "build:health": "npm run build --workspace @currant/health"
   }
 }
