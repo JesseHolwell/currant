@@ -31,24 +31,24 @@ export const ACCOUNT_COLORS = ["#8B2942", "#3D8B4F", "#C4843E", "#5C6FA8", "#9B6
 export const SUMMARY_TOP_MERCHANTS_PER_GROUP = 4;
 export const HIDDEN_FIXED_LEAF_TAIL_VALUE = 0.0001;
 
-export const MANUAL_RULES_STORAGE_KEY = "personal-spend-manual-rules-v1";
-export const MANUAL_DRAFTS_STORAGE_KEY = "personal-spend-manual-drafts-v1";
+export const MANUAL_RULES_STORAGE_KEY = "cash-manual-rules-v1";
+export const MANUAL_DRAFTS_STORAGE_KEY = "cash-manual-drafts-v1";
 export const CATEGORY_TAXONOMY_STORAGE_KEY =
-  "personal-spend-category-taxonomy-v1";
-export const ACCOUNT_ENTRIES_STORAGE_KEY = "personal-spend-account-entries-v1";
-export const ACCOUNT_HISTORY_STORAGE_KEY = "personal-spend-account-history-v1";
-export const GOALS_STORAGE_KEY = "personal-spend-goals-v1";
-export const PAYROLL_DRAFT_STORAGE_KEY = "personal-spend-payroll-draft-v1";
+  "cash-category-taxonomy-v1";
+export const ACCOUNT_ENTRIES_STORAGE_KEY = "cash-account-entries-v1";
+export const ACCOUNT_HISTORY_STORAGE_KEY = "cash-account-history-v1";
+export const GOALS_STORAGE_KEY = "cash-goals-v1";
+export const PAYROLL_DRAFT_STORAGE_KEY = "cash-payroll-draft-v1";
 export const FORECAST_SETTINGS_STORAGE_KEY =
-  "personal-spend-forecast-settings-v1";
+  "cash-forecast-settings-v1";
 export const TRANSACTION_BATCHES_STORAGE_KEY =
-  "personal-spend-transaction-batches-v1";
-export const AI_SUGGESTIONS_STORAGE_KEY = "personal-spend-ai-suggestions-v1";
-export const APP_SETTINGS_STORAGE_KEY = "personal-spend-settings-v1";
+  "cash-transaction-batches-v1";
+export const AI_SUGGESTIONS_STORAGE_KEY = "cash-ai-suggestions-v1";
+export const APP_SETTINGS_STORAGE_KEY = "cash-settings-v1";
 export const UPLOADED_TRANSACTIONS_STORAGE_KEY =
-  "personal-spend-uploaded-transactions-v1";
-export const UPLOADED_META_STORAGE_KEY = "personal-spend-uploaded-meta-v1";
-export const MONTHLY_CHECKIN_DISMISSED_KEY = "personal-spend-monthly-checkin-dismissed-v1";
+  "cash-uploaded-transactions-v1";
+export const UPLOADED_META_STORAGE_KEY = "cash-uploaded-meta-v1";
+export const MONTHLY_CHECKIN_DISMISSED_KEY = "cash-monthly-checkin-dismissed-v1";
 
 export const EMPTY_MANUAL_RULES: ManualRulesState = {
   byId: {},

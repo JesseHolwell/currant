@@ -13,8 +13,8 @@
 
 // ─── Storage keys (must mirror each vertical's constants) ─────────────
 
-const CASH_ACCOUNT_ENTRIES_KEY = "personal-spend-account-entries-v1";
-const CASH_TRANSACTION_BATCHES_KEY = "personal-spend-transaction-batches-v1";
+const CASH_ACCOUNT_ENTRIES_KEY = "cash-account-entries-v1";
+const CASH_TRANSACTION_BATCHES_KEY = "cash-transaction-batches-v1";
 
 const HEALTH_PROFILE_KEY = "health_profile";
 const HEALTH_CHECKINS_KEY = "health_checkins";
