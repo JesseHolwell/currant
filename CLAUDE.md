@@ -20,10 +20,12 @@ eventual cross-app aggregator + AI layer.
 ## Repo layout
 
 ```
-apps/cash/      Currant Cash — finance dashboard (React + Vite)
-apps/health/    Currant Health — body/fitness tracker (React + Vite)
+apps/shell/     Currant suite shell — landing page, auth, vertical switcher (currant.au/)
+apps/cash/      Currant Cash — finance dashboard (currant.au/cash)
+apps/health/    Currant Health — body/fitness tracker (currant.au/health)
 apps/cli/       Bank-export ingest CLI for Cash (deprecated, optional)
-packages/ui/    Shared design tokens — fonts, radii, color slot bindings
+packages/auth/  Shared Supabase client + useAuth hook (@currant/auth)
+packages/ui/    Shared design tokens — fonts, radii, color slot bindings (@currant/ui)
 packages/       Other shared packages get extracted here lazily — see packages/README.md
 data/           Raw / processed CSV + JSON for the ingest CLI (Cash-only)
 rules/          Category + payroll rules for the ingest CLI (Cash-only)
@@ -33,12 +35,33 @@ docs/           Product docs
 
 ## Deployment model (committed direction)
 
-**Production domain:** `currant.au`. The previously-owned `currant.cash` will
-likely redirect once the suite ships.
+**Production domain:** `currant.au`. The previously-owned `currant.cash` is
+held but will redirect once the suite ships.
 
-**Web:** single origin, path-based — `currant.au/`, `/cash`, `/health`,
-`/mind`, `/life`. Same origin matters because `localStorage` is origin-scoped
-and the Life aggregator needs to read across every vertical.
+**Web — per-app builds on one origin.** Each vertical builds independently
+to its own `dist/`. The hosting layer (Vercel rewrites / Cloudflare /
+nginx) routes paths to the right vertical:
+
+```
+currant.au/         → apps/shell/dist     (landing + auth + switcher)
+currant.au/cash/*   → apps/cash/dist      (Cash SPA)
+currant.au/health/* → apps/health/dist    (Health SPA)
+currant.au/mind/*   → apps/mind/dist      (future)
+currant.au/life/*   → apps/life/dist      (future)
+```
+
+Why same origin matters: `localStorage` is origin-scoped and the Life
+aggregator needs to read across every vertical. Subdomains would break that.
+
+Why per-app builds (not a single SPA with lazy routes): each vertical stays
+a standalone Vite app — no refactoring of mount points, independent deploys,
+better cache hits per app. Cross-vertical navigation is a full document
+load, which is fine because state we care about (Supabase session,
+localStorage) survives navigation on the same origin.
+
+In dev, each app's Vite server runs on its own port (shell: 5170, cash: 5174,
+health: 5175). The shell's vertical-card links use `import.meta.env.DEV` to
+switch between `localhost:5174` (dev) and `/cash` (prod).
 
 **iOS:** separate App Store app per vertical (one icon, one purpose). Bundle
 ids follow reverse-DNS: `au.currant.cash`, `au.currant.health`, etc. Apps
@@ -78,11 +101,13 @@ verticals write into the shared container.
 ```bash
 npm install                      # install all workspaces
 
-npm run cash                     # start cash dev server (alias: npm run web)
-npm run health                   # start health dev server
+npm run shell                    # start shell dev server (landing + auth) on :5170
+npm run cash                     # start cash dev server (alias: npm run web) on :5174
+npm run health                   # start health dev server on :5175
 npm run ingest                   # cash CLI: ingest a bank-export CSV
-npm run build                    # build cash for production
-npm run build:cash               # same as above, explicit
+
+npm run build:shell              # build shell for production
+npm run build:cash               # build cash for production
 npm run build:health             # build health for production
 ```
 
@@ -90,13 +115,19 @@ Per-app scripts (tests, capacitor sync, etc.) live in each app's `package.json`.
 
 ## Supabase / auth
 
-One Supabase project for the whole suite. Auth is shared (`auth.users` table).
-Per-app schemas: `cash.*`, `health.*`, `mind.*`, with `public.profiles` keyed
-by user id for cross-app metadata.
+One Supabase project for the whole suite, consumed via `@currant/auth`. Auth
+is shared (`auth.users` table) so sign-in via the shell carries across every
+vertical on the same origin. Per-app schemas: `cash.*`, `health.*`, `mind.*`,
+with `public.profiles` keyed by user id for cross-app metadata.
 
-Cash currently runs fully local-first; cloud sync via Supabase is optional
-and gated by `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`. Health will
-inherit the same pattern when its storage layer lands.
+Each app reads its own `.env.local`:
+```
+VITE_SUPABASE_URL=https://<project>.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+```
+The shell, cash, and any vertical with cloud sync all point at the same
+project. When the env vars are absent, `isSupabaseConfigured` is `false`
+and the app runs fully local-first.
 
 ## Memory
 

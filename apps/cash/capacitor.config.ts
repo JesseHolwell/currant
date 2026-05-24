@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.jesseholwell.currant',
-  appName: 'Currant',
+  appId: 'au.currant.cash',
+  appName: 'Currant Cash',
   webDir: 'dist',
 };
 

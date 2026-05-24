@@ -8,11 +8,13 @@ type Vertical = {
   tagline: string;
   description: string;
   status: VerticalStatus;
+  /** Vite dev port for this vertical, when running locally. */
+  devPort?: number;
   /**
-   * Where to send the user in dev. In production this becomes a path on the
-   * same origin (e.g. `/cash`). For now we link to each app's Vite dev port.
+   * Production path under currant.au. The server (Vercel rewrites / nginx /
+   * Cloudflare) routes this path to the vertical's built `dist/`. Same
+   * origin as the shell so localStorage and Supabase cookies are shared.
    */
-  devUrl?: string;
   productionPath: string;
 };
 
@@ -24,7 +26,7 @@ const VERTICALS: Vertical[] = [
     description:
       "Import bank CSVs, categorise spending, forecast cash flow, and run FIRE projections — all local-first.",
     status: "shipping",
-    devUrl: "http://localhost:5174",
+    devPort: 5174,
     productionPath: "/cash"
   },
   {
@@ -34,7 +36,7 @@ const VERTICALS: Vertical[] = [
     description:
       "Workouts, weekly check-ins, and body measurements. Low-friction logging, useful graphs.",
     status: "scaffolded",
-    devUrl: "http://localhost:5175",
+    devPort: 5175,
     productionPath: "/health"
   },
   {
@@ -56,6 +58,13 @@ const VERTICALS: Vertical[] = [
     productionPath: "/life"
   }
 ];
+
+function hrefFor(vertical: Vertical): string {
+  if (import.meta.env.DEV && vertical.devPort) {
+    return `http://localhost:${vertical.devPort}`;
+  }
+  return vertical.productionPath;
+}
 
 const STATUS_LABEL: Record<VerticalStatus, string> = {
   shipping: "Shipping",
@@ -181,7 +190,7 @@ function VerticalGrid({ signedIn }: { signedIn: boolean }) {
 
 function VerticalCard({ vertical, signedIn }: { vertical: Vertical; signedIn: boolean }) {
   const clickable = vertical.status !== "planned";
-  const href = vertical.devUrl ?? vertical.productionPath;
+  const href = hrefFor(vertical);
 
   const cardClasses =
     "group relative flex flex-col rounded-2xl border border-line bg-surface p-6 transition" +
