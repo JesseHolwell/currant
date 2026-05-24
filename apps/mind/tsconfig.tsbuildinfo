@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/domain/constants.ts","./src/domain/index.ts","./src/domain/types.ts","./src/domain/utils.ts","./src/features/tasks/tasksmanager.tsx","./src/features/today/todayview.tsx","./src/features/trends/trendsview.tsx","./src/store/index.ts","./src/store/logs.ts","./src/store/tasks.ts"],"version":"5.9.3"}

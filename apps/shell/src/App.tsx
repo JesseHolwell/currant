@@ -44,8 +44,9 @@ const VERTICALS: Vertical[] = [
     name: "Currant Mind",
     tagline: "Wellbeing you can track.",
     description:
-      "Journal, mood, meditation. The quiet companion to the other verticals.",
-    status: "planned",
+      "Daily habits, mood, and reflection. Tap your tasks off, set a mood, watch your trends.",
+    status: "scaffolded",
+    devPort: 5176,
     productionPath: "/mind"
   },
   {

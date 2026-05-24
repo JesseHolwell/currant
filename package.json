@@ -12,9 +12,11 @@
     "cash": "npm run dev --workspace @currant/cash",
     "web": "npm run dev --workspace @currant/cash",
     "health": "npm run dev --workspace @currant/health",
+    "mind": "npm run dev --workspace @currant/mind",
     "build": "npm run build --workspace @currant/cash",
     "build:shell": "npm run build --workspace @currant/shell",
     "build:cash": "npm run build --workspace @currant/cash",
-    "build:health": "npm run build --workspace @currant/health"
+    "build:health": "npm run build --workspace @currant/health",
+    "build:mind": "npm run build --workspace @currant/mind"
   }
 }
