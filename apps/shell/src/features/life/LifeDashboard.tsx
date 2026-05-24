@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { CashSummary, HealthSummary, MindSummary, SuiteSummary } from "../../lib/verticalData";
 import { readSuiteSummary } from "../../lib/verticalData";
+import { InstallPwaCard } from "./InstallPwaCard";
 
 /*
  * The signed-in mode of the shell — what Currant Life used to mean.
@@ -72,6 +73,8 @@ export function LifeDashboard({ userEmail }: { userEmail: string | null }) {
           <MindCard summary={summary.mind} />
         </div>
       </section>
+
+      <InstallPwaCard />
 
       <SuiteFooter />
     </main>
