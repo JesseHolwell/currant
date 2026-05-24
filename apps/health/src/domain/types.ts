@@ -6,6 +6,15 @@
  *   - All measurements stored in canonical units (kg, cm, seconds). UI converts for display.
  *   - IDs are opaque strings (uuid or short id) generated client-side; survive cloud sync.
  *   - Domain types are pure data — no methods, no React, no storage concerns.
+ *
+ * Deferred (intentionally not modelled yet):
+ *   - Cardio sessions (walking / cycling / running) — planned as a sibling
+ *     `CardioSession` with distance, duration, optional pace + heart rate.
+ *     Doesn't fit the reps/sets shape, so it gets its own type when added.
+ *   - Photo progress (front/side/back per check-in) — useful for visual
+ *     tracking but local blob storage is messy; deferred to phase 2.
+ *   - Training-experience level on the profile — only add if/when AI
+ *     suggestions need it. Avoid asking the user for data we don't use.
  */
 
 // ─── Identity & units ──────────────────────────────────────────────────
