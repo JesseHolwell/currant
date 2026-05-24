@@ -31,9 +31,9 @@ Then open the local Vite URL (usually `http://localhost:5173`).
 Upload your CSV in the `Data Source` panel.
 
 If you want to keep personal aliases, categories, accounts, or goals out of git,
-copy `web/src/domain/config/profile.example.json` to
-`web/src/domain/config/profile.local.json` and edit the local file instead. The
-local profile is gitignored and overrides the committed example defaults.
+copy `apps/cash/src/domain/config/profile.example.json` to
+`apps/cash/src/domain/config/profile.local.json` and edit the local file instead.
+The local profile is gitignored and overrides the committed example defaults.
 
 ## Product spec
 
@@ -51,31 +51,31 @@ local profile is gitignored and overrides the committed example defaults.
 ## Commands
 
 ```bash
-npm run web          # Start dev server
+npm run cash         # Start dev server (alias: npm run web)
 ```
 
 ```bash
-# Run from web/ directory
+# Run from apps/cash/ directory
 npm test             # Run unit tests (Vitest)
 npm run test:watch   # Watch mode
 npm run test:coverage # Coverage report
 ```
 
-Tests cover all pure domain functions in `web/src/domain/` — 7 test files, 132 tests.
+Tests cover all pure domain functions in `apps/cash/src/domain/` — 7 test files, 132 tests.
 
 ### iOS / TestFlight
 
 Prerequisites: macOS, Xcode, Apple Developer account.
 
 ```bash
-# From web/
+# From apps/cash/
 npm run ios          # build → sync to Xcode project → open Xcode
 ```
 
 Or step by step:
 
 ```bash
-cd web
+cd apps/cash
 npm run build        # compile to dist/
 npx cap sync ios     # copy dist/ into the Xcode project
 npx cap open ios     # open Xcode
@@ -100,44 +100,17 @@ Legacy (deprecated) CLI command:
 ├─ README.md
 ├─ PRODUCT_SPEC.md
 ├─ CLAUDE.md
-├─ web/
-│  └─ src/
-│     ├─ App.tsx               # Thin shell: auth, routing, event handlers
-│     ├─ main.tsx
-│     ├─ domain/               # Pure business logic (no React)
-│     │  ├─ types.ts
-│     │  ├─ constants.ts
-│     │  ├─ rules.ts
-│     │  ├─ taxonomy.ts
-│     │  ├─ csvImport.ts
-│     │  ├─ visualization.ts
-│     │  └─ ...
-│     ├─ store/                # Zustand slices with localStorage persistence
-│     │  ├─ transactions.ts
-│     │  ├─ categories.ts
-│     │  ├─ accounts.ts
-│     │  ├─ forecast.ts
-│     │  ├─ fire.ts
-│     │  ├─ settings.ts
-│     │  └─ ai.ts
-│     ├─ hooks/                # Thin wrappers + derived state
-│     │  ├─ useDashboardState.ts
-│     │  └─ ...
-│     ├─ features/             # Tab components (one folder per feature)
-│     │  ├─ transactions/
-│     │  ├─ categories/
-│     │  ├─ expenses/
-│     │  ├─ accounts/
-│     │  ├─ forecast/
-│     │  ├─ fire/
-│     │  ├─ income/
-│     │  └─ settings/
-│     └─ components/           # Shared / layout components
-│        ├─ dashboard/
-│        │  ├─ Dashboard.tsx
-│        │  ├─ Sidebar.tsx
-│        │  └─ WorkspaceHeader.tsx
-│        ├─ LandingPage.tsx
-│        └─ ErrorBoundary.tsx
-└─ cli/ (legacy, deprecated)
+├─ apps/
+│  ├─ cash/                    # Currant Cash — finance dashboard (React + Vite)
+│  │  └─ src/
+│  │     ├─ App.tsx            # Thin shell: auth, routing, event handlers
+│  │     ├─ main.tsx
+│  │     ├─ domain/            # Pure business logic (no React)
+│  │     ├─ store/             # Zustand slices with localStorage persistence
+│  │     ├─ hooks/             # Thin wrappers + derived state
+│  │     ├─ features/          # Tab components (one folder per feature)
+│  │     └─ components/        # Shared / layout components
+│  └─ cli/                     # Bank-export ingest CLI (legacy, deprecated)
+├─ packages/                   # Shared workspace packages — extract lazily
+└─ supabase/                   # Migrations + edge functions (shared across apps)
 ```

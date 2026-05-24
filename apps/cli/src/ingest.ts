@@ -791,7 +791,7 @@ function main(): void {
   writeJsonFile(path.join(outDir, "uncategorized.json"), uncategorized);
 
   if (options.publishWeb) {
-    const webPublicDir = path.join(projectRoot, "web", "public");
+    const webPublicDir = path.join(projectRoot, "apps", "cash", "public");
     if (fs.existsSync(webPublicDir)) {
       writeJsonFile(path.join(webPublicDir, "sankey.json"), sankey);
       writeJsonFile(path.join(webPublicDir, "income-model.json"), incomeModel);

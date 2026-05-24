@@ -11,11 +11,11 @@ data/samples/*.numbers
 data/samples/*.csv
 data/raw/*.csv
 rules/payroll.private.yml
-web/src/domain/config/profile.local.json
+apps/cash/src/domain/config/profile.local.json
 
 # generated outputs
 data/processed/*.json
-web/public/sankey.json
-web/public/uncategorized.json
-web/public/transactions.json
-web/public/income-model.json
+apps/cash/public/sankey.json
+apps/cash/public/uncategorized.json
+apps/cash/public/transactions.json
+apps/cash/public/income-model.json

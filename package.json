@@ -1,14 +1,15 @@
 {
-  "name": "personal-spend",
+  "name": "currant",
   "private": true,
   "version": "0.1.0",
   "workspaces": [
-    "cli",
-    "web"
+    "apps/*",
+    "packages/*"
   ],
   "scripts": {
-    "ingest": "npm run ingest --workspace cli --",
-    "web": "npm run dev --workspace web",
-    "build": "npm run build --workspace web"
+    "ingest": "npm run ingest --workspace @personal-spend/cli --",
+    "cash": "npm run dev --workspace @personal-spend/web",
+    "web": "npm run dev --workspace @personal-spend/web",
+    "build": "npm run build --workspace @personal-spend/web"
   }
 }
