@@ -1,44 +1,63 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,300&family=JetBrains+Mono:wght@400;500;600&display=swap");
 @import "tailwindcss";
+@import "@currant/ui/tokens.css";
 
 /*
- * Health uses the same typographic + shape DNA as Cash, but with its own
- * accent palette so the trajectory dashboard can colour-code by app.
- * When packages/ui lands, the shared @theme tokens move there and each app
- * keeps only its accent overrides here.
+ * Health palette — verdant green, in contrast to Cash's currant berry.
+ * Defines the suite-wide vars required by @currant/ui/tokens.css plus
+ * any health-only tokens.
  */
 
-@theme {
-  --font-sans:    "DM Sans", system-ui, -apple-system, sans-serif;
-  --font-display: "Fraunces", Georgia, serif;
-  --font-mono:    "JetBrains Mono", monospace;
-
-  --radius-sm: 0.125rem;
-  --radius-md: 0.375rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-}
-
 :root {
-  /* Health accent — verdant green (vs. cash's currant red). Placeholder;
-     tune once the design language is shared in packages/ui. */
-  --accent: #2f9e6b;
-  --accent-soft: #d8efe2;
-  --ink: #1a2421;
-  --muted: #6b7a74;
-  --surface: #faf8f3;
-  --line: #e6e1d6;
-}
+  /* Backgrounds */
+  --bg-main:    #faf8f3;
+  --bg-surface: #ffffff;
+  --bg-sidebar: #f3efe5;
 
-html, body, #root {
-  height: 100%;
+  /* Typography */
+  --ink:   #1a2421;
+  --muted: #6b7a74;
+
+  /* Borders */
+  --line:        rgba(26, 36, 33, 0.12);
+  --line-strong: rgba(26, 36, 33, 0.22);
+
+  /* Accent — verdant green (placeholder, tune later) */
+  --accent:        #2f9e6b;
+  --accent-soft:   rgba(47, 158, 107, 0.12);
+  --accent-strong: #1f7a51;
+  --accent-glow:   rgba(47, 158, 107, 0.22);
+
+  /* Status */
+  --danger:      #DC2626;
+  --danger-soft: rgba(220, 38, 38, 0.10);
+
+  color-scheme: light dark;
 }
 
 body {
-  margin: 0;
-  font-family: var(--font-sans);
   color: var(--ink);
-  background: var(--surface);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  background: var(--bg-main);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg-main:    hsl(150, 12%, 8%);
+    --bg-surface: hsl(150, 10%, 13%);
+    --bg-sidebar: hsl(150, 12%, 10%);
+
+    --ink:   hsl(150, 15%, 92%);
+    --muted: hsl(150, 8%, 60%);
+
+    --line:        rgba(255, 255, 255, 0.10);
+    --line-strong: rgba(255, 255, 255, 0.18);
+
+    --accent:        #4ec48a;
+    --accent-soft:   rgba(78, 196, 138, 0.18);
+    --accent-strong: #2f9e6b;
+
+    --danger:      #F87171;
+    --danger-soft: rgba(248, 113, 113, 0.15);
+
+    color-scheme: dark;
+  }
 }

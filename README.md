@@ -1,116 +1,102 @@
 # Currant
 
-Turn bank CSV exports into a clear, local-first money dashboard with minimal friction.
+A suite of local-first life-tracking apps. Each vertical is its own product;
+they share auth, design language, and an eventual cross-app aggregator
+(Currant Life) plus AI layer.
 
-`https://currant.cash`
+Production domain: `currant.au` *(suite goes live here once Life is ready;
+Cash is currently solo on `currant.cash`)*.
+
+## The suite
+
+| Vertical | What it tracks | Status |
+|---|---|---|
+| [Currant Cash](apps/cash/) | Finance — transactions, categories, forecasts, FIRE | shipping |
+| [Currant Health](apps/health/) | Body — workouts, weekly check-ins, measurements | scaffolded |
+| Currant Mind | Mental wellbeing — journal, mood, meditation | not started |
+| Currant Life | Cross-vertical aggregator + AI analytics | not started |
 
 ## Privacy model
 
-- All transaction data stays in the browser on the user's device.
-- CSVs are parsed client-side.
-- No backend or server-side financial data storage is required.
-- Clearing browser storage for this app will remove saved CSVs, rules, and settings.
+- All user data stays in the browser on the user's device by default.
+- Optional Supabase cloud sync enables cross-device access.
+- iOS apps share an App Group so the Life aggregator can read across
+  verticals on device without requiring the network.
 
 ## Tech stack
 
-- `Node.js + npm workspaces` (single command entry points)
-- Web: `React + Vite + Recharts (Sankey)`
-- Parsing/modeling: `TypeScript + Papa Parse`
-- State: `Zustand` with localStorage persistence
-- Testing: `Vitest` (domain unit tests)
-- iOS: `Capacitor` (wraps the web build in a native `WKWebView`)
+- **Monorepo:** Node.js + npm workspaces
+- **Web:** React 18 + Vite 5 + TypeScript 5 + Tailwind 4
+- **State:** Zustand with `localStorage` persistence
+- **Cloud (optional):** Supabase (auth + Postgres)
+- **iOS:** Capacitor, one app per vertical, App Group `group.au.currant`
+- **Testing:** Vitest (domain-only unit tests)
 
 ## Quick start
 
 ```bash
-npm install
-npm run web
+npm install              # install all workspaces
+npm run cash             # start Currant Cash on http://localhost:5174
+npm run health           # start Currant Health on http://localhost:5175
 ```
 
-Then open the local Vite URL (usually `http://localhost:5173`).
-Upload your CSV in the `Data Source` panel.
+Each app has its own README with vertical-specific instructions:
 
-If you want to keep personal aliases, categories, accounts, or goals out of git,
-copy `apps/cash/src/domain/config/profile.example.json` to
-`apps/cash/src/domain/config/profile.local.json` and edit the local file instead.
-The local profile is gitignored and overrides the committed example defaults.
+- [`apps/cash/README.md`](apps/cash/README.md)
+- [`apps/health/README.md`](apps/health/README.md)
 
-## Product spec
+## Repo layout
 
-- Feature scope and delivery status: [`PRODUCT_SPEC.md`](PRODUCT_SPEC.md)
+```text
+.
+├─ apps/
+│  ├─ cash/          Currant Cash — finance dashboard
+│  ├─ health/        Currant Health — body/fitness tracker
+│  └─ cli/           Bank-export ingest CLI for cash (deprecated)
+├─ packages/
+│  └─ ui/            @currant/ui — shared design tokens
+├─ data/             Cash ingest inputs (raw + processed CSVs)
+├─ rules/            Cash categorisation + payroll rules
+├─ supabase/         Migrations + edge functions (shared across apps)
+├─ docs/             Product docs
+├─ CLAUDE.md         Suite-level Claude Code instructions
+└─ README.md         You are here
+```
 
-## Core workflow
+## How the suite fits together
 
-1. Export CSV from your bank.
-2. Start UI: `npm run web`.
-3. Upload CSV in the app.
-4. Review and adjust coverage dates in the `Transaction Data` tab.
-5. Review Forecast, Accounts, Income, Expenses, and Categories tabs.
-6. Tune categories and rules directly in the UI.
+**Web** is a single origin (`currant.au`) with path-based routes per
+vertical — `/cash`, `/health`, `/mind`, `/life`. Same-origin matters because
+`localStorage` is origin-scoped and the Life aggregator needs to read across
+every vertical.
+
+**iOS** ships one App Store app per vertical (one icon, one purpose). They
+share an App Group container; the Life app reads JSON the verticals write
+into the shared container.
+
+**Auth + sync** happens through one shared Supabase project. Auth is in
+`auth.users`; per-app schemas keep their tables namespaced (`cash.*`,
+`health.*`, `mind.*`).
 
 ## Commands
 
 ```bash
-npm run cash         # Start dev server (alias: npm run web)
+npm run cash             # Cash dev server (alias: npm run web)
+npm run health           # Health dev server
+npm run ingest           # Cash CLI: ingest a bank-export CSV
+npm run build:cash       # Build Cash for production
+npm run build:health     # Build Health for production
 ```
 
-```bash
-# Run from apps/cash/ directory
-npm test             # Run unit tests (Vitest)
-npm run test:watch   # Watch mode
-npm run test:coverage # Coverage report
-```
+Per-app test/build/iOS scripts live in each app's `package.json`.
 
-Tests cover all pure domain functions in `apps/cash/src/domain/` — 7 test files, 132 tests.
+## Adding a new vertical
 
-### iOS / TestFlight
+See the "Adding a new vertical" section of [`CLAUDE.md`](CLAUDE.md) for the
+recipe. Short version: scaffold `apps/<name>/` as a sibling, add
+`"@currant/ui": "*"`, declare the required palette vars in `:root`, and add a
+per-app `CLAUDE.md` + `README.md`.
 
-Prerequisites: macOS, Xcode, Apple Developer account.
+## Product spec
 
-```bash
-# From apps/cash/
-npm run ios          # build → sync to Xcode project → open Xcode
-```
-
-Or step by step:
-
-```bash
-cd apps/cash
-npm run build        # compile to dist/
-npx cap sync ios     # copy dist/ into the Xcode project
-npx cap open ios     # open Xcode
-```
-
-In Xcode:
-
-1. Select your Apple Developer team under _Signing & Capabilities_.
-2. **Product → Archive** to build a release binary.
-3. Upload to TestFlight via Xcode Organizer.
-
-> Re-run `npx cap sync ios` (or `npm run ios`) after every web code change — it keeps the bundled assets up to date in the Xcode project.
-
-Legacy (deprecated) CLI command:
-
-- `npm run ingest -- --input ./bank-export.csv`
-
-## Project structure
-
-```text
-.
-├─ README.md
-├─ PRODUCT_SPEC.md
-├─ CLAUDE.md
-├─ apps/
-│  ├─ cash/                    # Currant Cash — finance dashboard (React + Vite)
-│  │  └─ src/
-│  │     ├─ App.tsx            # Thin shell: auth, routing, event handlers
-│  │     ├─ main.tsx
-│  │     ├─ domain/            # Pure business logic (no React)
-│  │     ├─ store/             # Zustand slices with localStorage persistence
-│  │     ├─ hooks/             # Thin wrappers + derived state
-│  │     ├─ features/          # Tab components (one folder per feature)
-│  │     └─ components/        # Shared / layout components
-│  └─ cli/                     # Bank-export ingest CLI (legacy, deprecated)
-├─ packages/                   # Shared workspace packages — extract lazily
-└─ supabase/                   # Migrations + edge functions (shared across apps)
-```
+Feature scope and delivery status: [`PRODUCT_SPEC.md`](PRODUCT_SPEC.md)

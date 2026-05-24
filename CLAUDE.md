@@ -1,73 +1,104 @@
-# Currant — Claude Code Instructions
+# Currant — Suite-level Claude Code Instructions
+
+These instructions apply to the whole monorepo. Per-app guidance lives in
+each app's own `CLAUDE.md` (e.g. `apps/cash/CLAUDE.md`) and is automatically
+picked up when working inside that directory.
+
+## What Currant is
+
+Currant is a suite of local-first life-tracking apps. Each vertical is its
+own product, but they share auth, design language, storage patterns, and an
+eventual cross-app aggregator + AI layer.
+
+| Vertical | What it tracks | Status |
+|---|---|---|
+| Currant Cash | Finance — transactions, categories, forecasts, FIRE | shipping |
+| Currant Health | Body — workouts, weekly check-ins, measurements | scaffolded |
+| Currant Mind | Mental wellbeing — journal, mood, meditation | not started |
+| Currant Life | Meta — aggregates from every vertical, AI layer | not started |
 
 ## Repo layout
 
-This is an npm-workspaces monorepo. Each vertical lives under `apps/`.
-
 ```
-apps/cash/      The finance dashboard (React + Vite). Local-first, optional Supabase sync, optional OpenAI categorisation.
-apps/cli/       Bank-export ingest CLI. Reads from data/raw and rules/, writes JSON into apps/cash/public.
-packages/       Shared workspace packages (empty for now — extract lazily; see packages/README.md).
-data/           Raw / processed CSV + JSON used by the ingest CLI.
-rules/          Category + payroll rules for the ingest CLI.
-supabase/       Supabase migrations + edge functions (shared across apps).
-docs/           Product docs.
-```
-
-**Start cash dev server:** `npm run cash` (alias: `npm run web`) from repo root
-**Type-check:** `cd apps/cash && npx tsc --noEmit`
-**Build cash:** `cd apps/cash && npm run build` (or `npm run build` from root)
-**Tests:** `cd apps/cash && npm test`
-**Ingest CSV:** `npm run ingest` from repo root
-
-## apps/cash architecture layers
-
-```
-domain/       Pure TypeScript — no React, no localStorage. All business logic lives here.
-store/        Zustand slices. Each slice owns its localStorage keys via persist middleware.
-hooks/        Thin wrappers around stores + useDashboardState (derived/computed state).
-features/     One folder per tab. TabComponent.tsx + any tab-specific sub-components.
-components/   Shared layout: Dashboard.tsx, Sidebar.tsx, WorkspaceHeader.tsx, ErrorBoundary.tsx.
-App.tsx       Shell only: auth state, cloud sync effects, event handlers, routes to <Dashboard />.
+apps/cash/      Currant Cash — finance dashboard (React + Vite)
+apps/health/    Currant Health — body/fitness tracker (React + Vite)
+apps/cli/       Bank-export ingest CLI for Cash (deprecated, optional)
+packages/ui/    Shared design tokens — fonts, radii, color slot bindings
+packages/       Other shared packages get extracted here lazily — see packages/README.md
+data/           Raw / processed CSV + JSON for the ingest CLI (Cash-only)
+rules/          Category + payroll rules for the ingest CLI (Cash-only)
+supabase/       Shared migrations + edge functions across the suite
+docs/           Product docs
 ```
 
-## Key conventions
+## Deployment model (committed direction)
 
-- **Domain functions are pure.** No side effects, no React, no localStorage in `domain/`.
-- **Zustand stores own persistence.** Do not read/write localStorage directly for app state — go through the store. Each store uses custom `PersistStorage` adapters when multiple keys are involved (categories, accounts, forecast).
-- **Updater pattern on setters.** Store setters accept `T | ((prev: T) => T)` so callers can use either form.
-- **Derived state lives in `useDashboardState`.** All `useMemo` chains that compute from raw store data belong there, not in App.tsx or components.
-- **Feature components are prop-driven.** No feature component reads directly from a Zustand store — all data flows in from App.tsx via Dashboard.tsx props.
+**Production domain:** `currant.au`. The previously-owned `currant.cash` will
+likely redirect once the suite ships.
 
-## Adding a new feature (within apps/cash)
+**Web:** single origin, path-based — `currant.au/`, `/cash`, `/health`,
+`/mind`, `/life`. Same origin matters because `localStorage` is origin-scoped
+and the Life aggregator needs to read across every vertical.
 
-1. Add types to `domain/types.ts`
-2. Add pure logic to a `domain/*.ts` file, export from `domain/index.ts`
-3. Add a store slice in `store/` if state needs persistence
-4. Add a hook in `hooks/` if the feature needs a thin wrapper
-5. Create `features/<name>/<Name>Tab.tsx`
-6. Add the tab to `domain/types.ts` (`DashboardTab` union), `Dashboard.tsx` (`TAB_META`, `OUTPUT_TABS`/`INPUT_TABS`, tab render block), and wire props through `App.tsx`
+**iOS:** separate App Store app per vertical (one icon, one purpose). Bundle
+ids follow reverse-DNS: `au.currant.cash`, `au.currant.health`, etc. Apps
+share an App Group (`group.au.currant`) so the Life app can read JSON the
+verticals write into the shared container.
 
-## Adding a new vertical (apps/health, apps/mindset, …)
+## Conventions across all apps
 
-1. Scaffold `apps/<name>/` as a sibling of `apps/cash` (same Vite + React + TS + Tailwind stack).
-2. Set `"name": "@currant/<name>"` in its package.json — npm workspaces will pick it up automatically.
-3. As soon as you find yourself copying code from `apps/cash` (design tokens, the Supabase client, the storage adapter pattern), extract it into `packages/<name>/` and import from there. See `packages/README.md` for the intended package set.
+- **Domain functions are pure.** No React, no `localStorage`, no fetch — pure
+  TypeScript in `apps/<name>/src/domain/`. All business logic lives there
+  and is the only thing unit-tested.
+- **Zustand stores own persistence.** Apps don't read/write `localStorage`
+  directly — they go through their store slices, which use custom
+  `PersistStorage` adapters when multiple keys are involved. The storage
+  pattern is currently in `apps/cash/src/store/`; extract to a shared package
+  the second time a vertical needs it.
+- **Feature components are prop-driven.** No tab/feature component reads
+  directly from a Zustand store — data flows in from the app shell.
+- **Updater-pattern setters.** Store setters accept `T | ((prev: T) => T)`.
 
-## Testing
+## Adding a new vertical (apps/mind, future)
 
-Tests live in `apps/cash/src/domain/__tests__/`. Run with `npm test` in `apps/cash/`. Coverage: `npm run test:coverage`.
+1. Scaffold `apps/<name>/` as a sibling of cash/health — copy the Vite +
+   TS + Tailwind 4 setup.
+2. Set `"name": "@currant/<name>"` in its `package.json`. npm workspaces
+   auto-detects it from the `apps/*` glob.
+3. Add `"@currant/ui": "*"` to its dependencies; have its `styles.css` do
+   `@import "@currant/ui/tokens.css"` and declare the required palette vars
+   in `:root` (contract documented in `packages/ui/README.md`).
+4. Add a per-app `CLAUDE.md` + `README.md`.
+5. As soon as a second pattern duplicates (auth, storage adapter, ErrorBoundary),
+   extract into `packages/<name>` rather than copying again. The Rule of Three
+   doesn't apply here — Rule of Two is fine for cross-vertical extraction.
 
-Only domain functions are unit-tested. Components are not tested yet.
+## Common commands (from repo root)
 
-## localStorage keys
+```bash
+npm install                      # install all workspaces
 
-Defined as constants in `apps/cash/src/domain/constants.ts`. The stores own these keys — don't add new direct `localStorage.getItem/setItem` calls in components or App.tsx. Use a store.
+npm run cash                     # start cash dev server (alias: npm run web)
+npm run health                   # start health dev server
+npm run ingest                   # cash CLI: ingest a bank-export CSV
+npm run build                    # build cash for production
+npm run build:cash               # same as above, explicit
+npm run build:health             # build health for production
+```
+
+Per-app scripts (tests, capacitor sync, etc.) live in each app's `package.json`.
 
 ## Supabase / auth
 
-Configured via `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` env vars. When not configured, `isSupabaseConfigured` is `false` and all auth UI is hidden. The app works fully without Supabase. When additional apps land, they share the same Supabase project — namespace tables by app (e.g. `cash.transactions`, `health.workouts`).
+One Supabase project for the whole suite. Auth is shared (`auth.users` table).
+Per-app schemas: `cash.*`, `health.*`, `mind.*`, with `public.profiles` keyed
+by user id for cross-app metadata.
 
-## FIRE Insights
+Cash currently runs fully local-first; cloud sync via Supabase is optional
+and gated by `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`. Health will
+inherit the same pattern when its storage layer lands.
 
-Free-tier feature (not premium). Settings (currentAge, annualReturn, multiplier) are persisted in `apps/cash/src/store/fire.ts` under the `fire_settings` localStorage key.
+## Memory
+
+Durable suite-level decisions (naming, domain, iOS strategy) are stored in
+your auto-memory. Refer there before relitigating architecture choices.
