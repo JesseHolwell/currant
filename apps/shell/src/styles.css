@@ -1,0 +1,62 @@
+@import "tailwindcss";
+@import "@currant/ui/tokens.css";
+
+/*
+ * Shell palette — neutral suite-level identity. Doesn't pick a single
+ * vertical's accent; instead each vertical card carries its own accent dot.
+ * That way the landing page reads as "the suite" not "Cash with extras".
+ */
+
+:root {
+  /* Backgrounds */
+  --bg-main:    #f7f4ee;
+  --bg-surface: #ffffff;
+
+  /* Typography */
+  --ink:   #2a2520;
+  --muted: #6f6960;
+
+  /* Borders */
+  --line: rgba(42, 37, 32, 0.12);
+
+  /* Accent — warm neutral suite-level tone */
+  --accent:      #8b6f47;
+  --accent-soft: rgba(139, 111, 71, 0.10);
+
+  /* Status */
+  --danger:      #DC2626;
+  --danger-soft: rgba(220, 38, 38, 0.10);
+
+  color-scheme: light dark;
+}
+
+body {
+  color: var(--ink);
+  background: var(--bg-main);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg-main:    hsl(30, 10%, 9%);
+    --bg-surface: hsl(30, 10%, 14%);
+
+    --ink:   hsl(30, 12%, 92%);
+    --muted: hsl(30, 8%, 60%);
+
+    --line: rgba(255, 255, 255, 0.10);
+
+    --accent:      #b89472;
+    --accent-soft: rgba(184, 148, 114, 0.18);
+
+    --danger:      #F87171;
+    --danger-soft: rgba(248, 113, 113, 0.15);
+
+    color-scheme: dark;
+  }
+}
+
+/* Per-vertical accent dots on the landing cards. */
+.dot-cash   { background: #8B2942; }
+.dot-health { background: #2f9e6b; }
+.dot-mind   { background: #6b5b95; }
+.dot-life   { background: linear-gradient(135deg, #8B2942 0%, #2f9e6b 50%, #6b5b95 100%); }

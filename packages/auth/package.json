@@ -1,0 +1,17 @@
+{
+  "name": "@currant/auth",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "peerDependencies": {
+    "@supabase/supabase-js": "^2.99.3",
+    "react": "^18.3.1"
+  }
+}
