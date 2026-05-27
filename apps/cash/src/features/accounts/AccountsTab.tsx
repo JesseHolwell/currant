@@ -169,7 +169,7 @@ export function AccountsTab({
                 </tr>
               </thead>
               <tbody>
-                {accountHistorySnapshots.map((snapshot) => (
+                {[...accountHistorySnapshots].reverse().map((snapshot) => (
                   <tr key={snapshot.id} className="hover:bg-[var(--bg-warm)] transition-colors">
                     <td className="py-[0.4rem] px-[0.5rem] border-b border-line">
                       <input
