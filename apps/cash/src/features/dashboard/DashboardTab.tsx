@@ -18,7 +18,18 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { formatCurrency, formatTimelineLabel } from "../../domain";
+import {
+  addMonths,
+  clampMonth,
+  compareMonths,
+  currentMonthValue,
+  formatCurrency,
+  formatTimelineLabel,
+  monthlyGrowthRate,
+  projectNetWorth,
+  stripLockedAccountHistory,
+} from "../../domain";
+import type { ForecastPoint, MonthlyExpenseData } from "../../domain";
 import { ChartTooltip } from "../../components/dashboard/ChartTooltip";
 
 function GoalCrossoverBadge({ viewBox, label }: { viewBox?: { x: number; y: number; height: number }; label: string }) {
@@ -31,7 +42,7 @@ function GoalCrossoverBadge({ viewBox, label }: { viewBox?: { x: number; y: numb
   const badgeY = 10;
   return (
     <g>
-      <rect x={badgeX} y={badgeY} width={badgeW} height={badgeH} rx={5} fill="#C4843E" opacity={0.95} />
+      <rect x={badgeX} y={badgeY} width={badgeW} height={badgeH} rx={5} fill="var(--accent-warm)" opacity={0.95} />
       <text x={x} y={badgeY + 14.5} textAnchor="middle" fill="#fff" fontSize={11} fontWeight="600" fontFamily="inherit">
         {text}
       </text>
@@ -62,7 +73,7 @@ function SavingsRateCard({
 
   return (
     <div className="fire-insight-card">
-      <div className="fire-insight-card-icon fire-insight-card-icon--savings" style={{ color: "#3D8B4F" }}>
+      <div className="fire-insight-card-icon fire-insight-card-icon--savings" style={{ color: "var(--accent-leaf)" }}>
         <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
           <rect x="2" y="11" width="18" height="9" rx="3" fill="currentColor" opacity="0.85"/>
           <path d="M9.5 9V3.5M9.5 3.5L7 6M9.5 3.5L12 6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
@@ -86,7 +97,7 @@ function SavingsRateCard({
             <circle
               r={r} cx={cx} cy={cy}
               fill="none"
-              stroke="#3D8B4F"
+              stroke="var(--accent-leaf)"
               strokeWidth={8}
               strokeDasharray={`${progressLength.toFixed(1)} ${(circumference - progressLength).toFixed(1)}`}
               strokeLinecap="round"
@@ -126,7 +137,7 @@ function FireTimelineCard({
 
   return (
     <div className="fire-insight-card">
-      <div className="fire-insight-card-icon fire-insight-card-icon--fire" style={{ color: "#C4843E" }}>
+      <div className="fire-insight-card-icon fire-insight-card-icon--fire" style={{ color: "var(--accent-warm)" }}>
         <svg width="22" height="22" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <path d="M8 14c3.314 0 6-2.462 6-5.5 0-1.8-.9-3.2-2-4.1-.2 1.3-.8 2.1-1.5 2.4C10.2 5 9.5 2.5 7.5 1c0 2-1 3.2-2 4-.5.4-1 1.2-1 2.5 0 .7.2 1.3.5 1.8C4.4 9 4 8.2 4 7.4c-.6.8-1 1.9-1 3.1C3 13.5 5.2 14 8 14Z" fill="currentColor" opacity="0.9"/>
         </svg>
@@ -179,7 +190,7 @@ function FireInsightBanner({
   const yrs = Math.ceil(yearsToFire);
   return (
     <div className="border border-line rounded-md p-4 bg-surface shadow-soft flex items-start gap-4">
-      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[rgba(196,132,62,0.12)] flex items-center justify-center" style={{ color: "#C4843E" }}>
+      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[var(--accent-warm)]/12 flex items-center justify-center" style={{ color: "var(--accent-warm)" }}>
         <svg width="20" height="20" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <path d="M8 14c3.314 0 6-2.462 6-5.5 0-1.8-.9-3.2-2-4.1-.2 1.3-.8 2.1-1.5 2.4C10.2 5 9.5 2.5 7.5 1c0 2-1 3.2-2 4-.5.4-1 1.2-1 2.5 0 .7.2 1.3.5 1.8C4.4 9 4 8.2 4 7.4c-.6.8-1 1.9-1 3.1C3 13.5 5.2 14 8 14Z" fill="currentColor" opacity="0.9"/>
         </svg>
@@ -232,13 +243,6 @@ type AccountSummary = {
   lockedAssets: number;
 };
 
-type ForecastPoint = {
-  label: string;
-  monthKey: string;
-  netWorth: number;
-  goal: number;
-};
-
 type AccountHistorySeries = {
   accountId: string;
   dataKey: string;
@@ -251,71 +255,6 @@ type AccountHistoryChartRow = {
   label: string;
   [key: string]: string | number;
 };
-
-type MonthlyCategoryConfig = {
-  category: string;
-  color: string;
-};
-
-type MonthlyExpenseData = {
-  rows: Array<{ month: string; label: string; [key: string]: string | number }>;
-  categories: MonthlyCategoryConfig[];
-};
-
-function currentMonthValue(): string {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-}
-
-function addMonthsToValue(month: string, delta: number): string {
-  const [yearRaw, monthRaw] = month.split("-");
-  const year = Number(yearRaw);
-  const monthIndex = Number(monthRaw) - 1;
-  if (!Number.isFinite(year) || !Number.isFinite(monthIndex)) {
-    return currentMonthValue();
-  }
-  const nextDate = new Date(year, monthIndex + delta, 1);
-  return `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, "0")}`;
-}
-
-function compareMonthValues(left: string, right: string): number {
-  return left.localeCompare(right);
-}
-
-function diffMonths(startMonth: string, endMonth: string): number {
-  const [startYearRaw, startMonthRaw] = startMonth.split("-");
-  const [endYearRaw, endMonthRaw] = endMonth.split("-");
-  const startYear = Number(startYearRaw);
-  const startMonthNumber = Number(startMonthRaw);
-  const endYear = Number(endYearRaw);
-  const endMonthNumber = Number(endMonthRaw);
-  if (
-    !Number.isFinite(startYear) ||
-    !Number.isFinite(startMonthNumber) ||
-    !Number.isFinite(endYear) ||
-    !Number.isFinite(endMonthNumber)
-  ) {
-    return 0;
-  }
-  return (endYear - startYear) * 12 + (endMonthNumber - startMonthNumber);
-}
-
-function clampMonthValue(value: string, min: string, max: string): string {
-  if (!value) return min;
-  if (compareMonthValues(value, min) < 0) return min;
-  if (compareMonthValues(value, max) > 0) return max;
-  return value;
-}
-
-function buildMonthLabel(month: string): string {
-  const [yearRaw, monthRaw] = month.split("-");
-  const year = Number(yearRaw);
-  const monthIndex = Number(monthRaw) - 1;
-  const date = new Date(year, monthIndex, 1);
-  return Number.isNaN(date.getTime())
-    ? month
-    : date.toLocaleString("en-AU", { month: "short", year: "2-digit" });
-}
 
 export function DashboardTab({
   currency,
@@ -363,7 +302,7 @@ export function DashboardTab({
   onTransactionDrilldown: (preset: { startMonth?: string; endMonth?: string; categoryGroup?: string }) => void;
 }) {
   const accountHistoryBounds = useMemo(() => {
-    const months = accountHistoryChartData.map((row) => row.month).filter(Boolean).sort(compareMonthValues);
+    const months = accountHistoryChartData.map((row) => row.month).filter(Boolean).sort(compareMonths);
     return {
       min: months[0] ?? "",
       max: months[months.length - 1] ?? ""
@@ -372,7 +311,7 @@ export function DashboardTab({
 
   const forecastDefaults = useMemo(() => {
     const baseMonth = forecastPoints[0]?.monthKey ?? currentMonthValue();
-    const defaultEndMonth = forecastPoints[forecastPoints.length - 1]?.monthKey ?? addMonthsToValue(baseMonth, 17);
+    const defaultEndMonth = forecastPoints[forecastPoints.length - 1]?.monthKey ?? addMonths(baseMonth, 17);
     return { baseMonth, defaultEndMonth };
   }, [forecastPoints]);
 
@@ -390,21 +329,21 @@ export function DashboardTab({
       return;
     }
     setAccountStartMonth((previous) => (
-      previous ? clampMonthValue(previous, accountHistoryBounds.min, accountHistoryBounds.max) : accountHistoryBounds.min
+      previous ? clampMonth(previous, accountHistoryBounds.min, accountHistoryBounds.max) : accountHistoryBounds.min
     ));
     setAccountEndMonth((previous) => (
-      previous ? clampMonthValue(previous, accountHistoryBounds.min, accountHistoryBounds.max) : accountHistoryBounds.max
+      previous ? clampMonth(previous, accountHistoryBounds.min, accountHistoryBounds.max) : accountHistoryBounds.max
     ));
   }, [accountHistoryBounds.max, accountHistoryBounds.min]);
 
   useEffect(() => {
     setForecastStartMonth((previous) => (
-      previous && compareMonthValues(previous, forecastDefaults.baseMonth) >= 0
+      previous && compareMonths(previous, forecastDefaults.baseMonth) >= 0
         ? previous
         : forecastDefaults.baseMonth
     ));
     setForecastEndMonth((previous) => (
-      previous && compareMonthValues(previous, forecastDefaults.baseMonth) >= 0
+      previous && compareMonths(previous, forecastDefaults.baseMonth) >= 0
         ? previous
         : forecastDefaults.defaultEndMonth
     ));
@@ -414,9 +353,9 @@ export function DashboardTab({
     if (!accountHistoryBounds.min || !accountHistoryBounds.max) {
       return null;
     }
-    const clampedStart = clampMonthValue(accountStartMonth || accountHistoryBounds.min, accountHistoryBounds.min, accountHistoryBounds.max);
-    const clampedEnd = clampMonthValue(accountEndMonth || accountHistoryBounds.max, accountHistoryBounds.min, accountHistoryBounds.max);
-    return compareMonthValues(clampedStart, clampedEnd) <= 0
+    const clampedStart = clampMonth(accountStartMonth || accountHistoryBounds.min, accountHistoryBounds.min, accountHistoryBounds.max);
+    const clampedEnd = clampMonth(accountEndMonth || accountHistoryBounds.max, accountHistoryBounds.min, accountHistoryBounds.max);
+    return compareMonths(clampedStart, clampedEnd) <= 0
       ? { start: clampedStart, end: clampedEnd }
       : { start: clampedEnd, end: clampedStart };
   }, [accountEndMonth, accountHistoryBounds.max, accountHistoryBounds.min, accountStartMonth]);
@@ -436,35 +375,24 @@ export function DashboardTab({
     const rangeFiltered = !accountRange
       ? accountHistoryChartData
       : accountHistoryChartData.filter((row) => (
-          compareMonthValues(row.month, accountRange.start) >= 0 &&
-          compareMonthValues(row.month, accountRange.end) <= 0
+          compareMonths(row.month, accountRange.start) >= 0 &&
+          compareMonths(row.month, accountRange.end) <= 0
         ));
     if (!hideLockedInTrend || !hasLockedAccounts) return rangeFiltered;
-    return rangeFiltered.map((row) => {
-      const next: AccountHistoryChartRow = { month: row.month, label: row.label, totalNetWorth: 0 };
-      let liquidTotal = 0;
-      for (const account of accountEntries) {
-        const key = `acct_${account.id}`;
-        if (lockedAccountIds.has(account.id)) continue;
-        const v = row[key];
-        if (typeof v === "number") {
-          next[key] = v;
-          liquidTotal += v;
-        }
-      }
-      next.totalNetWorth = Number(liquidTotal.toFixed(2));
-      return next;
-    });
+    const liquidAccountIds = accountEntries
+      .filter((account) => !lockedAccountIds.has(account.id))
+      .map((account) => account.id);
+    return stripLockedAccountHistory(rangeFiltered, liquidAccountIds);
   }, [accountHistoryChartData, accountRange, hideLockedInTrend, hasLockedAccounts, lockedAccountIds, accountEntries]);
 
   const forecastRange = useMemo(() => {
-    const start = compareMonthValues(forecastStartMonth || forecastDefaults.baseMonth, forecastDefaults.baseMonth) < 0
+    const start = compareMonths(forecastStartMonth || forecastDefaults.baseMonth, forecastDefaults.baseMonth) < 0
       ? forecastDefaults.baseMonth
       : (forecastStartMonth || forecastDefaults.baseMonth);
-    const endCandidate = compareMonthValues(forecastEndMonth || forecastDefaults.defaultEndMonth, forecastDefaults.baseMonth) < 0
+    const endCandidate = compareMonths(forecastEndMonth || forecastDefaults.defaultEndMonth, forecastDefaults.baseMonth) < 0
       ? forecastDefaults.baseMonth
       : (forecastEndMonth || forecastDefaults.defaultEndMonth);
-    return compareMonthValues(start, endCandidate) <= 0
+    return compareMonths(start, endCandidate) <= 0
       ? { start, end: endCandidate }
       : { start: endCandidate, end: start };
   }, [
@@ -474,43 +402,29 @@ export function DashboardTab({
     forecastStartMonth
   ]);
 
-  const forecastMonthlyGrowthRate = forecastCompoundingEnabled
-    ? Math.pow(1 + Math.max(0, forecastAnnualGrowthRate) / 100, 1 / 12) - 1
-    : 0;
+  const forecastMonthlyGrowthRate = monthlyGrowthRate(forecastAnnualGrowthRate, forecastCompoundingEnabled);
 
-  const visibleForecastPoints = useMemo(() => {
-    const finalOffset = Math.max(0, diffMonths(forecastDefaults.baseMonth, forecastRange.end));
-    const points: ForecastPoint[] = [];
-    let running = startNetWorth;
-
-    for (let offset = 0; offset <= finalOffset; offset += 1) {
-      const monthKey = addMonthsToValue(forecastDefaults.baseMonth, offset);
-      if (offset > 0) {
-        running = running * (1 + forecastMonthlyGrowthRate) + monthlyForecastDelta;
-      }
-      if (
-        compareMonthValues(monthKey, forecastRange.start) >= 0 &&
-        compareMonthValues(monthKey, forecastRange.end) <= 0
-      ) {
-        points.push({
-          label: buildMonthLabel(monthKey),
-          monthKey,
-          netWorth: Number(running.toFixed(2)),
-          goal: maxGoalTarget
-        });
-      }
-    }
-
-    return points;
-  }, [
-    forecastDefaults.baseMonth,
-    forecastMonthlyGrowthRate,
-    forecastRange.end,
-    forecastRange.start,
-    maxGoalTarget,
-    monthlyForecastDelta,
-    startNetWorth
-  ]);
+  const visibleForecastPoints = useMemo(
+    () =>
+      projectNetWorth({
+        baseMonth: forecastDefaults.baseMonth,
+        startNetWorth,
+        monthlyDelta: monthlyForecastDelta,
+        monthlyGrowthRate: forecastMonthlyGrowthRate,
+        rangeStart: forecastRange.start,
+        rangeEnd: forecastRange.end,
+        goalTarget: maxGoalTarget
+      }),
+    [
+      forecastDefaults.baseMonth,
+      forecastMonthlyGrowthRate,
+      forecastRange.end,
+      forecastRange.start,
+      maxGoalTarget,
+      monthlyForecastDelta,
+      startNetWorth
+    ]
+  );
 
   const expensePeriodLabel = formatTimelineLabel(timelinePeriod);
   const expenseChartTitle = timelinePeriod === "all"
@@ -635,17 +549,17 @@ export function DashboardTab({
               margin={{ top: 12, right: 24, bottom: 8, left: 4 }}
             >
               <CartesianGrid
-                stroke="rgba(61,36,56,0.08)"
+                stroke="var(--chart-grid)"
                 strokeDasharray="3 3"
               />
               <XAxis
                 dataKey="label"
-                stroke="rgba(61,36,56,0.25)"
-                tick={{ fill: "#9E7088" }}
+                stroke="var(--chart-axis)"
+                tick={{ fill: "var(--muted)" }}
               />
               <YAxis
-                stroke="rgba(61,36,56,0.25)"
-                tick={{ fill: "#9E7088" }}
+                stroke="var(--chart-axis)"
+                tick={{ fill: "var(--muted)" }}
                 width={96}
                 tickFormatter={(value) =>
                   formatCurrency(Number(value), currency)
@@ -662,7 +576,7 @@ export function DashboardTab({
               <Legend />
               <ReferenceLine
                 y={0}
-                stroke="rgba(61,36,56,0.15)"
+                stroke="var(--chart-ref)"
                 strokeDasharray="4 4"
               />
               {visibleAccountHistorySeries.map((series) => (
@@ -743,17 +657,17 @@ export function DashboardTab({
               margin={{ top: 44, right: 24, bottom: 8, left: 4 }}
             >
               <CartesianGrid
-                stroke="rgba(61,36,56,0.08)"
+                stroke="var(--chart-grid)"
                 strokeDasharray="3 3"
               />
               <XAxis
                 dataKey="label"
-                stroke="rgba(61,36,56,0.25)"
-                tick={{ fill: "#9E7088" }}
+                stroke="var(--chart-axis)"
+                tick={{ fill: "var(--muted)" }}
               />
               <YAxis
-                stroke="rgba(61,36,56,0.25)"
-                tick={{ fill: "#9E7088" }}
+                stroke="var(--chart-axis)"
+                tick={{ fill: "var(--muted)" }}
                 width={96}
                 tickFormatter={(value) =>
                   formatCurrency(Number(value), currency)
@@ -770,7 +684,7 @@ export function DashboardTab({
                 <Line
                   type="monotone"
                   dataKey="goal"
-                  stroke="#C4843E"
+                  stroke="var(--accent-warm)"
                   strokeDasharray="6 5"
                   dot={false}
                   name="Goal"
@@ -779,9 +693,9 @@ export function DashboardTab({
               <Line
                 type="monotone"
                 dataKey="netWorth"
-                stroke="#8B2942"
+                stroke="var(--accent)"
                 strokeWidth={3}
-                dot={{ r: 3, fill: "#8B2942" }}
+                dot={{ r: 3, fill: "var(--accent)" }}
                 name="Net Worth"
               />
               {(() => {
@@ -795,7 +709,7 @@ export function DashboardTab({
                 return (
                   <ReferenceLine
                     x={crossover.label}
-                    stroke="#C4843E"
+                    stroke="var(--accent-warm)"
                     strokeDasharray="4 3"
                     strokeWidth={1.5}
                     label={(props) => <GoalCrossoverBadge {...props} label={crossover.label} />}
@@ -902,11 +816,11 @@ export function DashboardTab({
           <div className="mt-[0.68rem] h-[360px]">
             <ResponsiveContainer width="100%" height={360}>
               <BarChart data={monthlyExpenseData.rows} margin={{ top: 12, right: 24, bottom: 8, left: 4 }} barCategoryGap="28%">
-                <CartesianGrid stroke="rgba(61,36,56,0.08)" strokeDasharray="3 3" />
-                <XAxis dataKey="label" stroke="rgba(61,36,56,0.25)" tick={{ fill: "#9E7088" }} />
+                <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
+                <XAxis dataKey="label" stroke="var(--chart-axis)" tick={{ fill: "var(--muted)" }} />
                 <YAxis
-                  stroke="rgba(61,36,56,0.25)"
-                  tick={{ fill: "#9E7088" }}
+                  stroke="var(--chart-axis)"
+                  tick={{ fill: "var(--muted)" }}
                   width={96}
                   tickFormatter={(value) => formatCurrency(Number(value), currency)}
                 />

@@ -12,3 +12,4 @@ export * from "./incomeModel";
 export * from "./transactionData";
 export * from "./goals";
 export * from "./snapshotImport";
+export * from "./forecast";

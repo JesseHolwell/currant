@@ -272,16 +272,16 @@ export function FireInsightsTab({
                 data={projectionData}
                 margin={{ top: 16, right: 24, bottom: 8, left: 4 }}
               >
-                <CartesianGrid stroke="rgba(61,36,56,0.08)" strokeDasharray="3 3" />
+                <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
                 <XAxis
                   dataKey="label"
-                  stroke="rgba(61,36,56,0.25)"
-                  tick={{ fill: "#9E7088" }}
-                  label={{ value: "Age", position: "insideBottomRight", offset: -4, fill: "#9E7088", fontSize: 11 }}
+                  stroke="var(--chart-axis)"
+                  tick={{ fill: "var(--muted)" }}
+                  label={{ value: "Age", position: "insideBottomRight", offset: -4, fill: "var(--muted)", fontSize: 11 }}
                 />
                 <YAxis
-                  stroke="rgba(61,36,56,0.25)"
-                  tick={{ fill: "#9E7088" }}
+                  stroke="var(--chart-axis)"
+                  tick={{ fill: "var(--muted)" }}
                   width={96}
                   tickFormatter={(v) => formatCurrency(Number(v), currency)}
                 />
@@ -296,29 +296,29 @@ export function FireInsightsTab({
                 {coastFireNumber > 0 && coastFireNumber < fireNumber ? (
                   <ReferenceLine
                     y={coastFireNumber}
-                    stroke="#7BA3A8"
+                    stroke="var(--chart-coast)"
                     strokeDasharray="5 4"
-                    label={{ value: "Coast FIRE", position: "insideTopLeft", fill: "#7BA3A8", fontSize: 11 }}
+                    label={{ value: "Coast FIRE", position: "insideTopLeft", fill: "var(--chart-coast)", fontSize: 11 }}
                   />
                 ) : null}
                 <ReferenceLine
                   y={leanFireNumber}
-                  stroke="#C4843E"
+                  stroke="var(--accent-warm)"
                   strokeDasharray="5 4"
-                  label={{ value: "Lean FIRE", position: "insideTopLeft", fill: "#C4843E", fontSize: 11 }}
+                  label={{ value: "Lean FIRE", position: "insideTopLeft", fill: "var(--accent-warm)", fontSize: 11 }}
                 />
                 <ReferenceLine
                   y={fireNumber}
-                  stroke="#3D7A52"
+                  stroke="var(--accent-leaf)"
                   strokeDasharray="5 4"
-                  label={{ value: "Full FIRE", position: "insideTopLeft", fill: "#3D7A52", fontSize: 11 }}
+                  label={{ value: "Full FIRE", position: "insideTopLeft", fill: "var(--accent-leaf)", fontSize: 11 }}
                 />
                 <Line
                   type="monotone"
                   dataKey="netWorth"
-                  stroke="#8B2942"
+                  stroke="var(--accent)"
                   strokeWidth={3}
-                  dot={{ r: 3, fill: "#8B2942" }}
+                  dot={{ r: 3, fill: "var(--accent)" }}
                   name="Net Worth"
                 />
               </LineChart>

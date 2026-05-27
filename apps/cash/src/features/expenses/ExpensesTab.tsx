@@ -1,12 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import './ExpensesTab.css';
 import { Bar, BarChart, ResponsiveContainer, Sankey, Tooltip, XAxis, YAxis } from "recharts";
-import { SUMMARY_TOP_MERCHANTS_PER_GROUP, formatCurrency, formatTimelineLabel } from "../../domain";
+import {
+  SUMMARY_TOP_MERCHANTS_PER_GROUP,
+  formatCurrency,
+  formatTimelineLabel,
+  monthOverMonthSpendChange
+} from "../../domain";
 import type {
   BuildVizResult,
   FlowStartMode,
   IncomeBasisMode,
   MerchantDetailMode,
+  MonthlyExpenseData,
   TimelinePeriod
 } from "../../domain";
 import { FlowTooltip, LinkShape, NodeShape } from "../../sankeyShapes";
@@ -24,16 +30,6 @@ const SPEND_PALETTE = [
   "#F7DDE4",
   "#FAE8ED",
 ];
-
-type MonthlyCategoryConfig = {
-  category: string;
-  color: string;
-};
-
-type MonthlyExpenseData = {
-  rows: Array<{ month: string; label: string; [key: string]: string | number }>;
-  categories: MonthlyCategoryConfig[];
-};
 
 export function ExpensesTab({
   currency,
@@ -118,19 +114,7 @@ export function ExpensesTab({
     return () => observer.disconnect();
   }, []);
 
-  const momChange = useMemo(() => {
-    if (monthlyExpenseData.rows.length < 2) return null;
-    const sumRow = (row: { [key: string]: string | number }) =>
-      monthlyExpenseData.categories.reduce((sum, cat) => {
-        const val = row[cat.category];
-        return sum + (typeof val === "number" ? val : 0);
-      }, 0);
-    const prev = sumRow(monthlyExpenseData.rows[monthlyExpenseData.rows.length - 2]);
-    const curr = sumRow(monthlyExpenseData.rows[monthlyExpenseData.rows.length - 1]);
-    if (prev === 0) return null;
-    const pct = ((curr - prev) / prev) * 100;
-    return { pct: Math.abs(Number(pct.toFixed(1))), up: pct >= 0 };
-  }, [monthlyExpenseData]);
+  const momChange = useMemo(() => monthOverMonthSpendChange(monthlyExpenseData), [monthlyExpenseData]);
 
   const effectiveLeftMargin = stageWidth > 0 ? Math.max(180, Math.round(stageWidth * 0.20)) : chartLeftMargin;
   const effectiveRightMargin = stageWidth > 0 ? Math.max(220, Math.round(stageWidth * 0.27)) : chartRightMargin;
@@ -347,7 +331,7 @@ export function ExpensesTab({
           <div className="mt-[0.8rem] h-[320px]">
             <ResponsiveContainer width="100%" height={320}>
               <BarChart data={monthlyExpenseData.rows} margin={{ top: 12, right: 16, bottom: 8, left: 4 }} barCategoryGap="28%">
-                <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: "#9E7088", fontSize: 12 }} />
+                <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: "var(--muted)", fontSize: 12 }} />
                 <YAxis hide />
                 <Tooltip
                   content={
@@ -355,7 +339,7 @@ export function ExpensesTab({
                       formatter={(value) => formatCurrency(value, currency)}
                     />
                   }
-                  cursor={{ fill: "rgba(139,41,66,0.06)" }}
+                  cursor={{ fill: "var(--accent-soft)" }}
                 />
                 {monthlyExpenseData.categories.map((cat, index) => (
                   <Bar

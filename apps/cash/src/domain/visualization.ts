@@ -853,3 +853,33 @@ export function buildVisualization(
     maxColumnNodes: Math.max(incomeStats.length, secondColumnCount, thirdColumnCount, fourthColumnCount, fifthColumnCount, sixthColumnCount, 1)
   };
 }
+
+export type MonthlyExpenseCategory = {
+  category: string;
+  color: string;
+};
+
+export type MonthlyExpenseData = {
+  rows: Array<{ month: string; label: string; [key: string]: string | number }>;
+  categories: MonthlyExpenseCategory[];
+};
+
+/**
+ * Month-over-month change in total spend across the last two rows.
+ * Returns null when there isn't enough history or the prior month was zero.
+ */
+export function monthOverMonthSpendChange(
+  data: MonthlyExpenseData
+): { pct: number; up: boolean } | null {
+  if (data.rows.length < 2) return null;
+  const sumRow = (row: { [key: string]: string | number }) =>
+    data.categories.reduce((sum, cat) => {
+      const value = row[cat.category];
+      return sum + (typeof value === "number" ? value : 0);
+    }, 0);
+  const prev = sumRow(data.rows[data.rows.length - 2]);
+  const curr = sumRow(data.rows[data.rows.length - 1]);
+  if (prev === 0) return null;
+  const pct = ((curr - prev) / prev) * 100;
+  return { pct: Math.abs(Number(pct.toFixed(1))), up: pct >= 0 };
+}

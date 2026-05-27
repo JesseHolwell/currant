@@ -66,6 +66,12 @@
   --chart-4: #5C1A2A;
   --chart-5: #C47090;
 
+  /* Chart chrome — grid lines, axes, neutral reference lines, Coast-FIRE marker */
+  --chart-grid: rgba(61, 36, 56, 0.08);
+  --chart-axis: rgba(61, 36, 56, 0.25);
+  --chart-ref: rgba(61, 36, 56, 0.15);
+  --chart-coast: #7BA3A8;
+
   /* Status */
   --danger: #DC2626;
   --danger-soft: rgba(220, 38, 38, 0.10);
@@ -318,6 +324,11 @@ select {
     --chart-4: #E08098;
     --chart-5: #B0899E;
 
+    --chart-grid: rgba(255, 255, 255, 0.08);
+    --chart-axis: rgba(255, 255, 255, 0.22);
+    --chart-ref: rgba(255, 255, 255, 0.18);
+    --chart-coast: #8FB8BD;
+
     --danger: #F87171;
     --danger-soft: rgba(248, 113, 113, 0.15);
 
@@ -363,6 +374,11 @@ select {
   --chart-3: #D4944E;
   --chart-4: #E08098;
   --chart-5: #B0899E;
+
+  --chart-grid: rgba(255, 255, 255, 0.08);
+  --chart-axis: rgba(255, 255, 255, 0.22);
+  --chart-ref: rgba(255, 255, 255, 0.18);
+  --chart-coast: #8FB8BD;
 
   --danger: #F87171;
   --danger-soft: rgba(248, 113, 113, 0.15);
