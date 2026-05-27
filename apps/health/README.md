@@ -6,10 +6,11 @@ sync via Supabase will mirror Cash's pattern when added.
 
 ## Status
 
-**Scaffold only.** Boots to a stub landing page that reflects an empty
-`HealthState`. The domain types in [`src/domain/types.ts`](src/domain/types.ts)
-are the source of truth for the data model and have not been wired to a
-store, hooks, or UI yet.
+**Functional scaffold.** Onboarding → dashboard → weekly check-in works,
+backed by Zustand stores (`store/profile.ts`, `store/checkIns.ts`). Workout
+logging is the main surface still to build. The domain types in
+[`src/domain/types.ts`](src/domain/types.ts) are the source of truth for the
+data model.
 
 ## Run it
 
@@ -28,18 +29,18 @@ npx tsc --noEmit         # type-check
 npm run build            # production build
 ```
 
-## Planned scope
+## Scope
 
-**Onboarding**
+**Onboarding** — *built*
 - Height, sex (optional), birth date (optional), starting weight, goals.
 
-**Weekly check-in**
+**Weekly check-in** — *built*
 - Weight (required).
 - Limb circumferences (all optional — neck, chest, waist, hips, biceps,
   thighs, calves).
 - Free-text notes.
 
-**Workout session**
+**Workout session** — *not yet built*
 - Pick exercises from an editable catalog.
 - Per-set: reps × weight (+ optional RPE and to-failure flag).
 - One-handed, low-friction entry is the design constraint.
@@ -47,17 +48,17 @@ npm run build            # production build
 See [`CLAUDE.md`](CLAUDE.md) in this directory for the data model rationale
 and build order when picking this up.
 
-## Project layers (target — mostly not built yet)
+## Project layers
 
 ```text
 src/
-├─ App.tsx              Shell: auth, route to active surface
+├─ App.tsx              Shell: routes onboarding → dashboard → check-in
 ├─ main.tsx
 ├─ domain/              Pure business logic
-│  └─ types.ts          ★ data model sketch — read this first ★
-├─ store/               (planned) Zustand slices
+│  └─ types.ts          ★ data model — read this first ★
+├─ store/               Zustand slices: profile.ts, checkIns.ts
 ├─ hooks/               (planned) Thin wrappers + derived state
-├─ features/            (planned) onboarding/, checkIn/, workout/
+├─ features/            onboarding/, dashboard/, checkIn/ built; workout/ planned
 ├─ components/          (planned) Shared layout
 └─ styles.css           Health palette. Imports @currant/ui/tokens.css.
 ```

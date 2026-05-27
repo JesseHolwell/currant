@@ -1,6 +1,6 @@
 # Currant Shell
 
-The suite entry point. Lives at `currant.au/` in production. Handles:
+The suite entry point. Lives at `currant.cash/` in production. Handles:
 
 - **Marketing landing** — describes each vertical (Cash, Health, Mind, Life)
   with status badges and per-brand accent dots.
@@ -9,7 +9,7 @@ The suite entry point. Lives at `currant.au/` in production. Handles:
   on the same origin.
 - **Vertical switcher** — clickable cards that link to each app. In dev
   they point at the Vite ports; in production they resolve to relative
-  paths under `currant.au`.
+  paths under `currant.cash`.
 
 The shell does **not** host the verticals as nested routes. Each vertical
 ships as its own standalone Vite build under a path on the same origin —

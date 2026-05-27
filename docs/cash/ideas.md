@@ -1,6 +1,6 @@
-# Ideas — 2026-05-12
+# Ideas — Currant Cash — 2026-05-12
 
-Captured for thinking-through. Not commitments.
+**Scope:** Cash vertical. Captured for thinking-through. Not commitments.
 
 ## Status (2026-05-12)
 
@@ -63,6 +63,57 @@ Captured for thinking-through. Not commitments.
   - The Sankey/pie views collapse the travel period into one node instead of fragmenting.
 - Ties into idea #3 — a travel period IS a badge on the timeline.
 - Insights ("you spent 40% more on food this month") suppress or annotate during travel so they don't mislead.
+
+## 5. Recurring & subscription detection
+
+**Pain:** No visibility into recurring/subscription spend. Subscriptions creep up,
+prices rise quietly, and "what am I actually committed to each month" is invisible.
+
+**Idea:** Detect transactions that recur at a stable cadence + amount and surface
+them as first-class subscriptions.
+
+- Lean on the existing similarity-key normalization in `domain/rules.ts` (already
+  strips card numbers / regional terms) to group repeat charges by merchant.
+- Detect cadence (monthly / annual) and stable amount across occurrences.
+- Surface a panel: total monthly recurring spend, next expected charge date per
+  subscription, and flags for price increases or a charge that's gone missing.
+
+**Why it matters:** Consistently a top-loved finance feature, and the similarity
+infra is ~80% of the way there. Feeds naturally into a future budgets layer and
+cash-flow runway view.
+
+## 6. Coast FIRE / Barista FIRE milestones
+
+**Context:** The FIRE tab already does the age projection and Two-Phase milestone
+cards. Coast FIRE is a motivating milestone that's a single formula on data we have.
+
+**Idea:** Add a **Coast FIRE** milestone — the net worth at which contributions can
+stop entirely and compound growth alone still hits the target by preservation age.
+
+- Compute from current age, preservation age, expected real return, and FIRE target
+  (all already in FIRE settings).
+- Optionally a Barista FIRE variant (partial income covers a slice of spend, the
+  rest coasts).
+- Render alongside existing milestone cards with a progress bar.
+
+**Why it matters:** Turns existing inputs into a new, emotionally resonant milestone
+with near-zero new data.
+
+## 7. Marginal tax rate & concessional super cap headroom
+
+**Context:** The income layer already models gross/net, tax, and employer
+contributions (`domain/incomeModel.ts`, `payroll.ts`). The AU-specific tax/super
+picture is right there in the data.
+
+**Idea:** Surface two derived numbers in the Income tab:
+
+- **Effective marginal tax rate** at current modeled income.
+- **Concessional contribution cap headroom** remaining — annual cap minus
+  (employer SG + salary-sacrifice contributions already modeled).
+
+**Why it matters:** Highly relevant for the AU sole user — directly actionable for
+salary-sacrifice decisions before EOFY. Additive: reads existing payroll model,
+needs the AU tax brackets + concessional cap as config.
 
 ---
 

@@ -14,7 +14,7 @@ may be acquired later but nothing in the code requires it.
 | [Currant Cash](apps/cash/) | Finance — transactions, categories, forecasts, FIRE | shipping |
 | [Currant Health](apps/health/) | Body — workouts, weekly check-ins, measurements | scaffolded |
 | [Currant Mind](apps/mind/) | Mental wellbeing — daily tasks, mood, reflection | scaffolded |
-| Currant Life | Cross-vertical dashboard at `currant.au/` | shell's signed-in mode |
+| Currant Life | Cross-vertical dashboard at `currant.cash/` | shell's signed-in mode |
 
 ## Privacy model
 
@@ -39,25 +39,28 @@ npm install              # install all workspaces
 npm run shell            # suite landing + auth on http://localhost:5170
 npm run cash             # Currant Cash on http://localhost:5174
 npm run health           # Currant Health on http://localhost:5175
+npm run mind             # Currant Mind on http://localhost:5176
 ```
 
 The shell's vertical cards link to each app — in dev they point at the Vite
-ports above; in production they resolve to relative paths on `currant.au`.
+ports above; in production they resolve to relative paths on `currant.cash`.
 
 Each app has its own README with vertical-specific instructions:
 
 - [`apps/shell/README.md`](apps/shell/README.md)
 - [`apps/cash/README.md`](apps/cash/README.md)
 - [`apps/health/README.md`](apps/health/README.md)
+- [`apps/mind/README.md`](apps/mind/README.md)
 
 ## Repo layout
 
 ```text
 .
 ├─ apps/
-│  ├─ shell/         Suite landing + auth + vertical switcher (currant.au/)
-│  ├─ cash/          Currant Cash — finance (currant.au/cash)
-│  ├─ health/        Currant Health — body/fitness (currant.au/health)
+│  ├─ shell/         Suite landing + auth + Life dashboard (currant.cash/)
+│  ├─ cash/          Currant Cash — finance (currant.cash/cash)
+│  ├─ health/        Currant Health — body/fitness (currant.cash/health)
+│  ├─ mind/          Currant Mind — daily tasks + mood (currant.cash/mind)
 │  └─ cli/           Bank-export ingest CLI for cash (deprecated)
 ├─ packages/
 │  ├─ auth/          @currant/auth — Supabase client + useAuth hook
@@ -97,10 +100,12 @@ session. Per-app Postgres schemas keep tables namespaced (`cash.*`,
 npm run shell            # Shell (landing + auth) dev server :5170
 npm run cash             # Cash dev server :5174 (alias: npm run web)
 npm run health           # Health dev server :5175
+npm run mind             # Mind dev server :5176
 npm run ingest           # Cash CLI: ingest a bank-export CSV
 npm run build:shell      # Build shell for production
 npm run build:cash       # Build Cash for production
 npm run build:health     # Build Health for production
+npm run build:mind       # Build Mind for production
 ```
 
 Per-app test/build/iOS scripts live in each app's `package.json`.
@@ -115,8 +120,13 @@ per-app `CLAUDE.md` + `README.md`.
 ## Deploying
 
 See [`DEPLOY.md`](DEPLOY.md). Single Vercel project builds all apps and
-serves them under one origin (`currant.au/`, `/cash`, `/health`, `/mind`).
+serves them under one origin (`currant.cash/`, `/cash`, `/health`, `/mind`).
 
-## Product spec
+## Product docs
 
-Feature scope and delivery status: [`PRODUCT_SPEC.md`](PRODUCT_SPEC.md)
+Suite map and per-vertical specs live under [`docs/`](docs/):
+
+- [`docs/suite-overview.md`](docs/suite-overview.md) — suite-level overview
+- [`docs/cash/`](docs/cash/) — Cash product spec, user flows, ideas
+- [`docs/health/`](docs/health/) · [`docs/mind/`](docs/mind/) · [`docs/shell/`](docs/shell/)
+- [`docs/style-guide.md`](docs/style-guide.md) — suite design system

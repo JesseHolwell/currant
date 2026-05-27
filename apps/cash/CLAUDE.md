@@ -72,9 +72,9 @@ writing.
 
 ## Supabase / auth
 
-Configured via `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. When not
-configured, `isSupabaseConfigured` is `false` and all auth UI is hidden — the
-app works fully without Supabase.
+Configured via `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. When
+not configured, `isSupabaseConfigured` is `false` and all auth UI is hidden —
+the app works fully without Supabase.
 
 ## FIRE Insights
 
@@ -84,7 +84,6 @@ localStorage key.
 
 ## iOS
 
-Capacitor wraps the web build in a `WKWebView`. Bundle id will be
-`au.currant.cash` (currently still `com.jesseholwell.currant` from before
-the rebrand — update during the domain-cutover work). Joins the shared
-App Group `group.au.currant` so the Life app can read cash data.
+Capacitor wraps the web build in a `WKWebView`. Bundle id is `au.currant.cash`
+(see `capacitor.config.ts`). Joins the shared App Group `group.au.currant` so
+the Life app can read cash data.

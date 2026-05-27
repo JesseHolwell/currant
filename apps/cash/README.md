@@ -7,8 +7,8 @@ exports into a clear, local-first money dashboard with minimal friction.
 
 - Drop-zone import for CSV exports (Papa Parse, client-side).
 - Auto-categorisation against editable rules (keyword + override files).
-- Transactions, Categories, Expenses, Income, Accounts, Forecast, and FIRE
-  Insights tabs.
+- Dashboard, Expenses, FIRE, Income, Accounts, Goals, Categories,
+  Transactions, and Imports tabs.
 - Optional AI-assisted categorisation (BYOK — bring your own OpenAI key).
 - Optional Supabase cloud sync (works fully without it).
 - iOS app via Capacitor (`au.currant.cash`, shipping under the suite's
@@ -51,8 +51,8 @@ to `src/domain/config/profile.local.json` and edit the local copy. The
 1. Export CSV from your bank.
 2. `npm run cash`.
 3. Upload CSV in the app's `Data Source` panel.
-4. Adjust coverage dates in the `Transaction Data` tab.
-5. Review Forecast, Accounts, Income, Expenses, and Categories tabs.
+4. Adjust coverage dates in the `Imports` tab.
+5. Review the Dashboard, Accounts, Income, Expenses, and Categories tabs.
 6. Tune categories and rules directly in the UI.
 
 ## Project layers

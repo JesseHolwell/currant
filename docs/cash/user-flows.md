@@ -1,4 +1,7 @@
-# User Flows
+# User Flows — Currant Cash
+
+**Scope:** the Cash vertical. Other verticals document their own flows under
+`docs/<vertical>/`.
 
 Three primary flows mapped to the app's information architecture.
 
@@ -38,7 +41,7 @@ Landing
     - Savings targets with name, current, and target values
     - Emergency fund suggestion based on inferred monthly expenses
 
-  → Dashboard (Forecast tab) — "setup complete" moment
+  → Dashboard tab — "setup complete" moment
 ```
 
 Wizard state persists across steps. Each step can be skipped.
@@ -47,12 +50,14 @@ Re-entry is blocked once the key is set.
 
 ---
 
-## 🔲 Flow 2 — Monthly Check-in (returning user) — PENDING
+## ✅ Flow 2 — Monthly Check-in (returning user)
 
-Entry point: Home tab banner triggered when last import is >30 days ago.
+Entry point: sidebar banner (`checkInDue`) triggered when the last import is
+>30 days ago. Implemented in `components/monthly-checkin/MonthlyCheckInWizard.tsx`;
+dismissal persists under `MONTHLY_CHECKIN_DISMISSED_KEY`.
 
 ```
-Home tab → "It's been 31 days" banner + [Start monthly update]
+Sidebar → "It's been 31 days" banner + [Start monthly update]
 
   → Lightweight 3-step modal (not full wizard):
 

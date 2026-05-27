@@ -1,13 +1,21 @@
-# Product Spec
+# Product Spec — Currant Cash
+
+**Scope:** the Cash vertical only. Suite-wide concerns (the marketing landing,
+the signed-in Life dashboard, auth) live in the shell — see
+[`suite-overview.md`](../suite-overview.md) and [`docs/shell/`](../shell/).
 
 Feature checklist for the product.  
 Legend: `[x]` shipped, `[ ]` not shipped.
 
 ## Homepage / Landing page
 
+> Note: the suite-level marketing landing now lives in the **shell**
+> (`currant.cash/`), not in Cash. Cash still renders its own lightweight
+> pre-onboarding entry point.
+
 - [x] Standalone landing page shown before the app shell loads (unauthenticated entry point).
 - [x] App name, tagline, and brief description of core functionality.
-- [x] Feature highlights section (Forecast, Expenses, FIRE Insights, Auto-categorisation, etc.).
+- [x] Feature highlights section (Dashboard, Expenses, FIRE Insights, Auto-categorisation, etc.).
 - [x] Free vs premium tier comparison (what you get on each tier).
 - [x] Three CTAs: `Sign up`, `Log in`, `Continue with free tier`.
 - [x] `Continue with free tier` bypasses auth and goes straight to the app (local storage mode).
@@ -15,11 +23,16 @@ Legend: `[x]` shipped, `[ ]` not shipped.
 
 ## Navigation and layout
 
-- [x] Sidebar navigation with these tabs: `Forecast`, `Accounts`, `Income`, `Expenses`, `Categories`.
+- [x] Sidebar navigation. Current tabs in order: `Dashboard`, `Expenses`, `FIRE`,
+  `Income`, `Accounts`, `Goals`, `Categories`, `Transactions`, `Imports`.
 - [x] Honeyjar-inspired two-pane layout (left nav + right workspace).
 - [x] Keep these tabs out of scope for now: `Cards`, `Investments`, `Scenarios`, `Projections`, `Reimburse`.
 
-## Forecast tab
+## Dashboard tab
+
+> Formerly "Forecast". The net-worth forecast is now one card within the
+> Dashboard, alongside the savings-rate gauge, FIRE timeline, net-worth
+> summary, account trend, asset allocation, and spending breakdowns.
 
 - [x] Line chart forecast for projected net worth over upcoming months.
 - [x] Input for start net worth value.
@@ -65,7 +78,15 @@ Legend: `[x]` shipped, `[ ]` not shipped.
 - [x] Local browser persistence for category setup and rules.
 - [ ] Rule suggestion helper from uncategorized transactions.
 
-## Transaction Data tab
+## Transactions tab
+
+- [x] Transaction browser: list, drill-down, edit merchant/category/nickname.
+- [x] Apply a manual edit to similar transactions (batch update).
+- [x] Surface CSV import warnings/errors.
+
+## Imports tab
+
+> Formerly "Transaction Data".
 
 - [x] Uploaded CSV batch list with local browser persistence.
 - [x] Editable coverage start/end dates per CSV.
@@ -75,7 +96,8 @@ Legend: `[x]` shipped, `[ ]` not shipped.
 ## Goals
 
 - [x] Goal list with editable name/current/target values.
-- [x] Goal progress bars in Forecast and sidebar.
+- [x] Three tracking modes: `manual`, `accounts` (sum selected accounts), `netWorth`.
+- [x] Goal progress bars on the Dashboard and in the sidebar.
 - [ ] Optionally mark goals as distinct so the funds are not counted twice.
 
 ## FIRE Insights tab
@@ -86,7 +108,9 @@ Legend: `[x]` shipped, `[ ]` not shipped.
 - [x] Savings rate tracker: monthly savings as a % of gross income.
 - [x] Configurable inputs: expected annual return, safe withdrawal rate multiplier, current age.
 - [x] Net worth projection chart (age vs net worth with FIRE number overlay).
-- [x] Coast FIRE and Lean FIRE milestone numbers displayed.
+- [x] Two-phase (bridge + post-preservation) model with `lockedUntilAge` super accounts and a preservation-age setting.
+- [x] Two-Phase FIRE milestone cards displayed.
+- [ ] Coast FIRE / Barista FIRE milestone numbers (see ideas.md #6).
 - [ ] Milestone markers on the forecast chart (e.g. "Coast FIRE", "Lean FIRE", "Full FIRE").
 - [ ] Spending vs net worth combined chart over time.
 
@@ -95,7 +119,8 @@ Legend: `[x]` shipped, `[ ]` not shipped.
 - [x] SSO sign-in (Google OAuth).
 - [x] Anonymous / guest mode retained for users who don't sign in (local storage only, no sync).
 - [x] Session persistence across browser tabs.
-- [ ] Account settings page: manage connected providers, display name, sign out.
+- [x] Settings tab handles display name, currency, birth year, and sign-out.
+- [ ] Manage connected OAuth providers from settings.
 - [ ] Auth gating: premium features require a signed-in account.
 
 ## Premium Tier
@@ -110,31 +135,38 @@ Legend: `[x]` shipped, `[ ]` not shipped.
 
 ## Cloud Persistence (Premium)
 
-- [x] Supabase backend: users table, transactions table, categories table, rules table, accounts table.
-- [x] On sign-in, offer to migrate existing local storage data to cloud.
-- [x] Real-time sync across devices and browsers for signed-in premium users.
+> Sync is snapshot-based: the full app state serialises to a single Supabase
+> `user_data` row per user (not per-entity tables).
+
+- [x] Supabase backend (`user_data` snapshot row per user).
+- [x] Real-time sync across devices/browsers via a Supabase Realtime channel (own-write dedupe).
 - [x] Free tier continues to use local storage exclusively — no data sent to server.
 - [x] Conflict resolution strategy for offline edits (last-write-wins as initial approach).
-- [x] Data export: allow users to download all their cloud data as JSON at any time.
+- [x] Data export/import: download or restore the full app state as JSON from Settings.
+- [ ] On sign-in, offer to migrate existing local storage data to cloud (download/upload primitives exist; first-run migration flow not yet wired).
 
 ## Auto-categorisation (Premium)
 
-- [ ] On CSV upload, send uncategorised transactions to OpenAI for a first-pass category suggestion.
-- [ ] Suggestions displayed inline in the Categories tab with accept / reject / edit actions.
-- [ ] Accepted suggestions auto-create a transaction rule so the same merchant is categorised on future uploads.
-- [ ] User can trigger re-categorisation on demand for any uncategorised transactions.
-- [ ] Category suggestions also proposed for any missing category definitions (new merchant types).
-- [ ] OpenAI API key configurable in settings (user-supplied key as initial approach, platform key later).
-- [ ] Free tier: no LLM categorisation; manual rules only.
+- [x] Send uncategorised transactions to OpenAI for a first-pass category suggestion (`store/ai.ts` + `lib/openai`).
+- [x] Suggestions displayed inline in the Categories tab with accept / reject / accept-all actions.
+- [x] User can trigger re-categorisation on demand.
+- [x] OpenAI API key configurable in settings (user-supplied key).
+- [x] Free tier: no LLM categorisation; manual rules only.
+- [ ] Accepted suggestions auto-create a transaction rule for future uploads.
+- [ ] Category suggestions proposed for missing category definitions (new merchant types).
 
 ## Mobile App
 
-- [ ] React Native (Expo) wrapper targeting iOS initially.
-- [ ] Feature parity with web app for core tabs (Forecast, Accounts, Income, Expenses, Categories, FIRE Insights).
+> Implemented with **Capacitor** (wraps the web build in a `WKWebView`), not
+> React Native/Expo. Bundle id `au.currant.cash`; shares App Group
+> `group.au.currant` so the Life app can read Cash data.
+
+- [x] Capacitor iOS wrapper (`npm run ios` → build → `cap sync ios` → Xcode).
+- [x] Feature parity with web (it is the web build).
 - [ ] CSV upload via iOS share sheet or Files app picker.
 - [ ] Deployed to TestFlight for internal / beta testing.
 - [ ] App Store submission out of scope for initial milestone.
-- [ ] Shared business logic extracted into a platform-agnostic package (no DOM dependencies).
+- [x] Shared business logic is pure TypeScript in `domain/` (no DOM dependencies).
 
 ## Data ingestion
 

@@ -31,32 +31,6 @@ URL — both work, both are the same origin family from Vercel's perspective).
   references `./assets/...` — relative paths resolve correctly under any
   sub-path.
 
-## Migrating the existing Vercel project
-
-There's already a Vercel project deployed for Currant Cash from before the
-monorepo restructure. It needs a small reconfiguration to pick up the new
-multi-app build.
-
-1. **Open the project in Vercel → Settings → General.**
-2. **Root Directory:** make sure this is **empty / `.`** (repo root), not
-   `web` or `apps/cash`. The `vercel.json` lives at the repo root and
-   handles routing for all four apps. If Root Directory points at a
-   sub-folder, Vercel will look for `vercel.json` inside that folder and
-   miss the suite-wide config.
-3. **Framework Preset:** `Other` (let `vercel.json` drive the build).
-4. **Build Command:** leave blank (inherits `npm run build:all` from
-   `vercel.json`).
-5. **Output Directory:** leave blank (inherits `dist` from `vercel.json`).
-6. **Install Command:** `npm install` (default).
-7. **Node Version:** 20.x or 22.x.
-
-Click **Save**, then trigger a redeploy from the **Deployments** tab
-(latest commit → ⋯ → Redeploy).
-
-If anything goes wrong and the project is too tangled to debug, you can
-also delete the old project and re-import — DNS for `currant.cash` and the
-Supabase URL allow-list are the only things to re-wire (see below).
-
 ## Environment variables
 
 Set these in Vercel **Project Settings → Environment Variables**, scope to

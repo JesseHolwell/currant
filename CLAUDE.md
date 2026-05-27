@@ -26,10 +26,10 @@ the only place that reads other verticals' localStorage directly.
 ## Repo layout
 
 ```
-apps/shell/     Suite shell — marketing landing (signed out) + Life dashboard (signed in) at currant.au/
-apps/cash/      Currant Cash — finance dashboard (currant.au/cash)
-apps/health/    Currant Health — body/fitness tracker (currant.au/health)
-apps/mind/      Currant Mind — daily tasks + mood (currant.au/mind)
+apps/shell/     Suite shell — marketing landing (signed out) + Life dashboard (signed in) at currant.cash/
+apps/cash/      Currant Cash — finance dashboard (currant.cash/cash)
+apps/health/    Currant Health — body/fitness tracker (currant.cash/health)
+apps/mind/      Currant Mind — daily tasks + mood (currant.cash/mind)
 apps/cli/       Bank-export ingest CLI for Cash (deprecated, optional)
 packages/auth/  Shared Supabase client + useAuth hook (@currant/auth)
 packages/ui/    Shared design tokens — fonts, radii, color slot bindings (@currant/ui)

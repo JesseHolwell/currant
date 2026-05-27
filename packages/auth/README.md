@@ -18,7 +18,7 @@ Each app provides its own env vars (`.env.local`):
 
 ```
 VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=ey...
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 ```
 
 Import:

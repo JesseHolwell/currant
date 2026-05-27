@@ -12,10 +12,11 @@ mirror Cash's pattern when added.
 
 ## Status
 
-**Scaffold only.** Boots to a stub landing page that reflects an empty
-`HealthState`. The domain types in `src/domain/types.ts` are the source of
-truth for the data model and have not been wired to a store, hooks, or UI
-yet.
+**Functional scaffold.** The core loop works: `App.tsx` routes
+onboarding → dashboard → weekly check-in based on profile state. Backed by
+two Zustand stores (`store/profile.ts`, `store/checkIns.ts`). Workout logging
+is the main surface not yet built. The domain types in `src/domain/types.ts`
+remain the source of truth for the data model.
 
 ## Commands
 
@@ -31,17 +32,17 @@ npx tsc --noEmit         # type-check
 npm test                 # unit tests (none yet)
 ```
 
-## Planned layers (mirroring cash)
+## Layers (mirroring cash)
 
 ```
 src/
-├─ App.tsx              Shell: auth state, route to active surface.
+├─ App.tsx              Shell: routes onboarding → dashboard → check-in.
 ├─ main.tsx
 ├─ domain/              Pure TypeScript — types + business logic.
-│  └─ types.ts          Current sketch of the data model. ★ start here ★
-├─ store/               Zustand slices (not yet implemented).
+│  └─ types.ts          Data model. ★ start here ★
+├─ store/               Zustand slices: profile.ts, checkIns.ts.
 ├─ hooks/               (not yet implemented)
-├─ features/            One folder per surface: onboarding/, checkIn/, workout/.
+├─ features/            onboarding/, dashboard/, checkIn/ built; workout/ pending.
 ├─ components/          Shared layout (not yet implemented).
 └─ styles.css           Health palette (verdant green). Imports @currant/ui/tokens.css.
 ```

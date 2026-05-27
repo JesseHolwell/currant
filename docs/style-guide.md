@@ -1,6 +1,8 @@
 # Currant Design System
 
-Style guide for the Currant financial health app.
+**Scope:** suite-wide. These tokens and brand rules apply to every vertical;
+each vertical declares its own palette on top of `@currant/ui` (see
+[`suite-overview.md`](./suite-overview.md)).
 
 Source: https://v0-currant-financial-dashboard.vercel.app/
 
